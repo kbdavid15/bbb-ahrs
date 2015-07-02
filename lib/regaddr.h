@@ -1,0 +1,13 @@
+#define HMC_DEVICE_ADDRESS	0x1E
+#define HMC_READ_ADDRESS 	0x3D
+#define HMC_WRITE_ADDRESS 	0x3C
+#define HMC_CONFIG_REG_A	0x00
+#define HMC_CONFIG_REG_B	0x01
+#define HMC_MODE_REG		0x02
+#define HMC_DATA_2B_START_X	0x03
+#define HMC_DATA_2B_START_Y	0x05
+#define HMC_DATA_2B_START_Z	0x07
+#define HMC_STATUS_REG		0x09
+#define HMC_ID_REG_A		0x0A
+#define HMC_ID_REG_B		0x0B
+#define HMC_ID_REG_C		0x0C
