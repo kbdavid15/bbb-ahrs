@@ -12,37 +12,27 @@
 #include <unistd.h>
 
 #include "../include/myi2c.h"
-#include "../include/SPI.h"
 #include "../include/regaddr.h"
 #include "BlackLib/BlackSPI/BlackSPI.h"
+#include "../include/HMC5883L.h"
 
 using namespace std;
 
 int main() {
-	i2cDevice *i2cptr = new i2cDevice(HMC_DEVICE_ADDRESS);
-	unsigned char value = i2cptr->readByte(HMC_DEVICE_ADDRESS, HMC_ID_REG_A);
-	cout << "Value: " << value << endl;
+	HMC5883L *mHMC = new HMC5883L();
+	string devID = mHMC->getDeviceID();
+	cout << "New Class ID: " << devID << endl;
 
-	i2cptr->readBytes(HMC_DEVICE_ADDRESS, HMC_ID_REG_A, 3);
-	for (int i = 0; i < 3; i++)
-	{
-		cout << i2cptr->i2c_read_buffer[i];
-	}
-	cout << endl;
-
-	// create new spi device on SPI0 (ADXL)
-//	SPI *spi = new SPI();
-//	spi->open(2, 1);
-//	spi->setMode(0);
-//	spi->setSpeed(10000);
-//	spi->setBitsPerWord(8);
-//	spi->setClockPhase(1);
-//	spi->setClockPolarity(1);
-//	uint8_t writebuf[1] = { 0x00 };
-//	uint8_t readbuf[1];
+//	i2cDevice *i2cptr = new i2cDevice(HMC_DEVICE_ADDRESS);
+//	unsigned char value = i2cptr->readByte(HMC_ID_REG_A);
+//	cout << "Value: " << value << endl;
 //
-//	spi->xfer1(writebuf, readbuf, 1);
-//	printf("SPI read this result: %x\n", readbuf[0]);
+//	i2cptr->readBytes(HMC_ID_REG_A, 3);
+//	for (int i = 0; i < 3; i++)
+//	{
+//		cout << i2cptr->i2c_read_buffer[i];
+//	}
+//	cout << endl;
 
 	BlackLib::BlackSPI mySpi(BlackLib::SPI0_0, 8, BlackLib::SpiMode3, 2400000);
 	mySpi.open( BlackLib::ReadWrite | BlackLib::NonBlock );

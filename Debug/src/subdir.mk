@@ -4,17 +4,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/SPI.cpp \
+../src/HMC5883L.cpp \
 ../src/main.cpp \
 ../src/myi2c.cpp 
 
 OBJS += \
-./src/SPI.o \
+./src/HMC5883L.o \
 ./src/main.o \
 ./src/myi2c.o 
 
 CPP_DEPS += \
-./src/SPI.d \
+./src/HMC5883L.d \
 ./src/main.d \
 ./src/myi2c.d 
 

@@ -16,7 +16,8 @@ i2cDevice::i2cDevice() {
 
 i2cDevice::i2cDevice(unsigned char DEVICE_ADDRESS) {
 	this->i2cOpen();
-	this->seti2cAddress(DEVICE_ADDRESS);
+	this->_address = DEVICE_ADDRESS;
+	this->seti2cAddress(_address);
 }
 
 
@@ -50,10 +51,10 @@ void i2cDevice::seti2cAddress(unsigned char address)
 	else cout << "OK" <<endl;
 }
 
-void i2cDevice::sendByte(unsigned char device_addr, unsigned char reg_addr, unsigned char data)
+void i2cDevice::sendByte(unsigned char reg_addr, unsigned char data)
 {
 	//seti2cAddress(device_addr);
-	cout << "beagle-i2c writing 0x"<< hex << (int)data <<" to 0x"<<hex <<(int)device_addr << ", reg 0x" <<hex<<(int)reg_addr <<"... ";
+	cout << "beagle-i2c writing 0x"<< hex << (int)data <<" to 0x"<<hex <<(int)_address << ", reg 0x" <<hex<<(int)reg_addr <<"... ";
 	i2c_write_buffer[0] = reg_addr;
 	i2c_write_buffer[1] = data;
 
@@ -63,7 +64,7 @@ void i2cDevice::sendByte(unsigned char device_addr, unsigned char reg_addr, unsi
 	else cout << "OK";
 }
 
-unsigned char i2cDevice::readByte(unsigned char DEVICE_ADDR,unsigned char Reg_ADDR){
+unsigned char i2cDevice::readByte(unsigned char Reg_ADDR){
 	i2c_write_buffer[0] = Reg_ADDR;
 
 	//seti2cAddress(DEVICE_ADDR);
@@ -78,7 +79,7 @@ unsigned char i2cDevice::readByte(unsigned char DEVICE_ADDR,unsigned char Reg_AD
 	return i2c_read_buffer[0];
 }
 
-unsigned char i2cDevice::readBytes(unsigned char DEVICE_ADDR, unsigned char Reg_ADDR, size_t n){
+unsigned char i2cDevice::readBytes(unsigned char Reg_ADDR, size_t n){
 	i2c_write_buffer[0] = Reg_ADDR;
 
 	//seti2cAddress(DEVICE_ADDR);
