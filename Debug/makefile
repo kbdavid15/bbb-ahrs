@@ -8,6 +8,15 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include src/BlackLib/BlackUART/subdir.mk
+-include src/BlackLib/BlackTime/subdir.mk
+-include src/BlackLib/BlackSPI/subdir.mk
+-include src/BlackLib/BlackPWM/subdir.mk
+-include src/BlackLib/BlackI2C/subdir.mk
+-include src/BlackLib/BlackGPIO/subdir.mk
+-include src/BlackLib/BlackDirectory/subdir.mk
+-include src/BlackLib/BlackADC/subdir.mk
+-include src/BlackLib/subdir.mk
 -include src/subdir.mk
 -include subdir.mk
 -include objects.mk

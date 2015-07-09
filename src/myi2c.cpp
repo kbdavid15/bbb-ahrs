@@ -5,13 +5,20 @@
 // Copyright   : Your copyright notice
 // Description : Hello World in C++, Ansi-style
 //============================================================================
-#include "../lib/myi2c.h"
+#include "../include/myi2c.h"
+
 #include <iostream>
 using namespace std;
 
 i2cDevice::i2cDevice() {
 	this->i2cOpen();
 }
+
+i2cDevice::i2cDevice(unsigned char DEVICE_ADDRESS) {
+	this->i2cOpen();
+	this->seti2cAddress(DEVICE_ADDRESS);
+}
+
 
 i2cDevice::~i2cDevice() {
 	this->i2cClose();
@@ -45,7 +52,7 @@ void i2cDevice::seti2cAddress(unsigned char address)
 
 void i2cDevice::sendByte(unsigned char device_addr, unsigned char reg_addr, unsigned char data)
 {
-	seti2cAddress(device_addr);
+	//seti2cAddress(device_addr);
 	cout << "beagle-i2c writing 0x"<< hex << (int)data <<" to 0x"<<hex <<(int)device_addr << ", reg 0x" <<hex<<(int)reg_addr <<"... ";
 	i2c_write_buffer[0] = reg_addr;
 	i2c_write_buffer[1] = data;
@@ -59,11 +66,11 @@ void i2cDevice::sendByte(unsigned char device_addr, unsigned char reg_addr, unsi
 unsigned char i2cDevice::readByte(unsigned char DEVICE_ADDR,unsigned char Reg_ADDR){
 	i2c_write_buffer[0] = Reg_ADDR;
 
-	seti2cAddress(DEVICE_ADDR);
+	//seti2cAddress(DEVICE_ADDR);
 	if(write(g_i2cFile, i2c_write_buffer, 1) != 1) {
 		perror("Write Error in myI2C::Read_I2C_Byte");
 	}
-	seti2cAddress(DEVICE_ADDR);
+	//seti2cAddress(DEVICE_ADDR);
 	if(read(g_i2cFile, i2c_read_buffer, 1) !=1){
 		perror("Read Error myI2C::Read_I2C_Byte");
 	}
@@ -71,14 +78,22 @@ unsigned char i2cDevice::readByte(unsigned char DEVICE_ADDR,unsigned char Reg_AD
 	return i2c_read_buffer[0];
 }
 
+unsigned char i2cDevice::readBytes(unsigned char DEVICE_ADDR, unsigned char Reg_ADDR, size_t n){
+	i2c_write_buffer[0] = Reg_ADDR;
 
+	//seti2cAddress(DEVICE_ADDR);
+	ssize_t s = write(g_i2cFile, i2c_write_buffer, 1);
+	if( s != 1) {
+		cout << "Wanted to write " << 1 << " byte, but instead wrote " << s << ". " <<endl;
+		perror("Write Error in i2cDevice::readBytes");
+	}
+	//seti2cAddress(DEVICE_ADDR);
+	ssize_t t = read(g_i2cFile, i2c_read_buffer, n);
+	if( t != n)
+	{
+		cout << "Wanted to read " << n << " bytes, but instead got " << t << ". " <<endl;
+		perror("Read Error in i2cDevice::readBytes");
+	}
 
-
-
-
-
-
-
-
-
-
+	return i2c_read_buffer[0];
+}

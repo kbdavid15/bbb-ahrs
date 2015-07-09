@@ -19,9 +19,11 @@
 
 class i2cDevice {
 	int g_i2cFile;
+	unsigned char _address;
 
 public:
 	i2cDevice();	// constructor
+	i2cDevice(unsigned char DEVICE_ADDR);	// constructor
 	~i2cDevice();	// destructor
 
 	unsigned char i2c_write_buffer[MAX_BUF_SIZE];
@@ -32,7 +34,6 @@ public:
 	void seti2cAddress(unsigned char address);
 	void sendByte(unsigned char DEVICE_ADDR, unsigned char REG_ADDR, unsigned char DATA);
 	unsigned char readByte(unsigned char DEVICE_ADDR, unsigned char REG_ADDR);
-
 	unsigned char readBytes(unsigned char DEVICE_ADDR, unsigned char REG_ADDR, size_t n);
 };
 #endif /* LIB_MYI2C_H_ */
