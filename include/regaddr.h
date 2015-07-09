@@ -16,6 +16,8 @@
 #define HMC_ID_REG_B		0x0B
 #define HMC_ID_REG_C		0x0C
 
+
+
 /* ADXL345 - Digital Accelerometer
  * Connected to SPI0_0
  * Register Definitions

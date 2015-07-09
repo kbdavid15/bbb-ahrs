@@ -27,13 +27,13 @@ i2cDevice::~i2cDevice() {
 
 void i2cDevice::i2cOpen()
 {
-	cout << "beagle-i2c opening /dev/i2c-1... ";
+	//cout << "beagle-i2c opening /dev/i2c-1... ";
 	g_i2cFile = open("/dev/i2c-1", O_RDWR);
 	if (g_i2cFile < 0) {
 		perror("i2cOpen in i2cDevice::i2cOpen");
 		exit(1);
 	}
-	else cout << "OK"<<endl;
+	//else cout << "OK"<<endl;
 }
 
 void i2cDevice::i2cClose()
@@ -43,25 +43,25 @@ void i2cDevice::i2cClose()
 
 void i2cDevice::seti2cAddress(unsigned char address)
 {
-	cout << "beagle-i2c setting address 0x"<< hex <<(int)address <<"... ";
+	//cout << "beagle-i2c setting address 0x"<< hex <<(int)address <<"... ";
 	if (ioctl(g_i2cFile, I2C_SLAVE, address) < 0) {
 		perror("i2cSetAddress error in myI2C::i2cSetAddress");
 		exit(1);
 	}
-	else cout << "OK" <<endl;
+	//else cout << "OK" <<endl;
 }
 
 void i2cDevice::sendByte(unsigned char reg_addr, unsigned char data)
 {
 	//seti2cAddress(device_addr);
-	cout << "beagle-i2c writing 0x"<< hex << (int)data <<" to 0x"<<hex <<(int)_address << ", reg 0x" <<hex<<(int)reg_addr <<"... ";
+	//cout << "beagle-i2c writing 0x"<< hex << (int)data <<" to 0x"<<hex <<(int)_address << ", reg 0x" <<hex<<(int)reg_addr <<"... ";
 	i2c_write_buffer[0] = reg_addr;
 	i2c_write_buffer[1] = data;
 
 	if(write(g_i2cFile, i2c_write_buffer, 2) != 2) {
 		perror("Write Error in myI2C::Send_I2C_Byte");
 	}
-	else cout << "OK";
+	//else cout << "OK" << endl;
 }
 
 unsigned char i2cDevice::readByte(unsigned char Reg_ADDR){

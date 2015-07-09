@@ -12,27 +12,31 @@
 #include <unistd.h>
 
 #include "../include/myi2c.h"
-#include "../include/regaddr.h"
+//#include "../include/regaddr.h"
 #include "BlackLib/BlackSPI/BlackSPI.h"
 #include "../include/HMC5883L.h"
 
 using namespace std;
 
 int main() {
-	HMC5883L *mHMC = new HMC5883L();
+	HMC::HMC5883L *mHMC = new HMC::HMC5883L();
 	string devID = mHMC->getDeviceID();
 	cout << "New Class ID: " << devID << endl;
-
-//	i2cDevice *i2cptr = new i2cDevice(HMC_DEVICE_ADDRESS);
-//	unsigned char value = i2cptr->readByte(HMC_ID_REG_A);
-//	cout << "Value: " << value << endl;
+//	mHMC->setConfigRegA();
 //
-//	i2cptr->readBytes(HMC_ID_REG_A, 3);
-//	for (int i = 0; i < 3; i++)
-//	{
-//		cout << i2cptr->i2c_read_buffer[i];
-//	}
-//	cout << endl;
+//	ConfigRegA a(AvgSamples1, DataRate_3, Normal);
+//	cout << sizeof(a) << endl;
+	mHMC->setConfigRegA(HMC::AVG_SAMPLES_4 | HMC::DATA_RATE_15 | HMC::MEAS_MODE_NORM);
+	printf("HMC Config Reg A: %x\n", mHMC->getConfigRegA());
+//	mHMC->setConfigRegA(HMC::CRA_DEFAULT);
+//	printf("HMC Default Config Reg A: %x\n", mHMC->getConfigRegA());
+	mHMC->setModeRegister(HMC::ContinuousMeasurement);
+	cout << "Mode Register: " << mHMC->getModeRegister() << endl;
+
+	HMC::Data data = mHMC->getDataXYZ();
+	cout << "X Data: " << data.x << endl;
+	cout << "Y Data: " << data.y << endl;
+	cout << "Z Data: " << data.z << endl;
 
 	BlackLib::BlackSPI mySpi(BlackLib::SPI0_0, 8, BlackLib::SpiMode3, 2400000);
 	mySpi.open( BlackLib::ReadWrite | BlackLib::NonBlock );
