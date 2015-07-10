@@ -64,7 +64,7 @@ clean:
 	-@echo ' '
 
 post-build:
-	-scp /home/kbdavid15/workspace/bbb-ahrs/Debug/bbb-ahrs root@192.168.1.3:/home/root/bbb_ahrs/
+	-scp /home/kbdavid15/workspace/bbb-ahrs/Debug/bbb-ahrs root@192.168.7.2:/home/root/bbb_ahrs/
 	-@echo ' '
 
 .PHONY: all clean dependents

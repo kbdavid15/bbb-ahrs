@@ -39,12 +39,14 @@ int main() {
 	cout << "Y: " << data.y << endl;
 	cout << "Z: " << data.z << endl;
 
-	BlackLib::BlackSPI mySpi(BlackLib::SPI1_0, 8, BlackLib::SpiDefault, 100000);
+	BlackLib::BlackSPI mySpi(BlackLib::SPI1_0, 8, BlackLib::SpiMode3, 100000);
 	mySpi.open( BlackLib::ReadWrite | BlackLib::NonBlock );
-	uint8_t result = mySpi.transfer(0x0F);	// expected: 0b11010011
-	printf("L3G4200D Device ID (0x0F): %x\n", result);
+	uint8_t result = mySpi.transfer(0x0F, 100);	// expected: 0b11010011
+	printf("L3G4200D ID (0x0F): %x\n", result);
 
 	ADX::ADXL345 adx;
-	printf("\nDevice ID: %X\n", adx.getDeviceID());
+	adx.getXYZ();
+	printf("\nADXL Device ID: %X\n", adx.getDeviceID());
+	printf("Threshold Tap: %X\n", adx.getThresholdTap());
 	return 0;
 }

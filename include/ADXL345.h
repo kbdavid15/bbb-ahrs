@@ -47,6 +47,12 @@
 
 namespace ADX
 {
+	struct Data {
+		int16_t x;
+		int16_t y;
+		int16_t z;
+	};
+
 	class ADXL345
 	{
 		BlackLib::BlackSPI spi;
@@ -58,6 +64,80 @@ namespace ADX
 		unsigned char getDeviceID();
 		unsigned char getThresholdTap();
 		void setThresholdTap(unsigned char thresh);
+		unsigned char getAxisOffsetX();
+		void setAxisOffsetX(unsigned char offset);
+		unsigned char getAxisOffsetY();
+		void setAxisOffsetY(unsigned char offset);
+		unsigned char getAxisOffsetZ();
+		void setAxisOffsetZ(unsigned char offset);
+		unsigned char getTapDuration();
+		void setTapDuration(unsigned char dur);
+		unsigned char getTapLatency();
+		void setTapLatency(unsigned char latency);
+		unsigned char getTapWindow();
+		void setTapWindow(unsigned char window);
+		unsigned char getActivityThreshold();
+		void setActivityThreshold(unsigned char thresh);
+		unsigned char getInactivityThreshold();
+		void setInactivityThreshold(unsigned char thresh);
+		unsigned char getInactivityTime();
+		void setInactivityTime(unsigned char);
+		unsigned char getAxisEnableControl();
+		void setAxisEnableControl(unsigned char);
+		unsigned char getFreeFallThreshold();
+		void setFreeFallThreshold(unsigned char thresh);
+
+		unsigned char getFreeFallTime();
+		void setFreeFallTime(unsigned char);
+		unsigned char getAxisControlTap();
+		void setAxisControlTap(unsigned char);
+		unsigned char getTapSource();
+		unsigned char getDataRatePwrModeCtrl();
+		void setDataRatePwrModeCtrl(unsigned char);
+		unsigned char getPowerCtrl();
+		void setPowerCtrl(unsigned char);
+		unsigned char getInterruptCtrl();
+		void setInterruptCtrl(unsigned char);
+		unsigned char getInterruptMapCtrl();
+		void setInterruptMapCtrl(unsigned char);
+		unsigned char getInterruptSource();
+		unsigned char getDataFormat();
+		void setDataFormat(unsigned char);
+		int16_t getDataX();
+		int16_t getDataY();
+		int16_t getDataZ();
+		Data getXYZ();
+		unsigned char getFIFOCtrl();
+		void setFIFOCtrl(unsigned char);
+		unsigned char getFIFOStatus();
+		void setFIFOStatus(unsigned char);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	};
 
 }
