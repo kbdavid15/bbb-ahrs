@@ -23,6 +23,7 @@ C_UPPER_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
+src \
 src/BlackLib/BlackADC \
 src/BlackLib \
 src/BlackLib/BlackDirectory \
@@ -32,5 +33,4 @@ src/BlackLib/BlackPWM \
 src/BlackLib/BlackSPI \
 src/BlackLib/BlackTime \
 src/BlackLib/BlackUART \
-src \
 

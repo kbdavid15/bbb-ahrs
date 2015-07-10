@@ -84,5 +84,14 @@ namespace HMC {
 		d.z = ((device->i2c_read_buffer[4] << 8) + (device->i2c_read_buffer[5]));
 		return d;
 	}
-
+	Status HMC5883L::getStatus() {
+		unsigned char statusReg = device->readByte(HMC_STATUS_REG);
+		Status status;
+		status.DataReady = statusReg & 0x01;
+		status.DataLocked = statusReg & 0x02;
+		return status;
+//		if (statusReg & 0x01) {
+//			status.DataReady = true;
+//		}
+	}
 }

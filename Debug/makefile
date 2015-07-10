@@ -56,13 +56,18 @@ bbb-ahrs: $(OBJS) $(USER_OBJS)
 	arm-linux-gnueabi-g++  -o "bbb-ahrs" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
+	$(MAKE) --no-print-directory post-build
 
 # Other Targets
 clean:
 	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) bbb-ahrs
 	-@echo ' '
 
+post-build:
+	-scp /home/kbdavid15/workspace/bbb-ahrs/Debug/bbb-ahrs root@192.168.1.3:/home/root/bbb_ahrs/
+	-@echo ' '
+
 .PHONY: all clean dependents
-.SECONDARY:
+.SECONDARY: post-build
 
 -include ../makefile.targets
