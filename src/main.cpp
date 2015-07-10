@@ -20,13 +20,10 @@
 using namespace std;
 
 int main() {
-	HMC::HMC5883L hmc;// = new HMC::HMC5883L();
+	HMC::HMC5883L hmc;
 	string devID = hmc.getDeviceID();
 	cout << "New Class ID: " << devID << endl;
-//	hmc.setConfigRegA();
-//
-//	ConfigRegA a(AvgSamples1, DataRate_3, Normal);
-//	cout << sizeof(a) << endl;
+
 	hmc.setConfigRegA(HMC::AVG_SAMPLES_4 | HMC::DATA_RATE_15 | HMC::MEAS_MODE_NORM);
 	printf("HMC Config Reg A: %x\n", hmc.getConfigRegA());
 //	hmc.setConfigRegA(HMC::CRA_DEFAULT);
@@ -42,10 +39,11 @@ int main() {
 	cout << "Y: " << data.y << endl;
 	cout << "Z: " << data.z << endl;
 
-//	BlackLib::BlackSPI mySpi(BlackLib::SPI0_0, 8, BlackLib::SpiMode3, 2400000);
-//	mySpi.open( BlackLib::ReadWrite | BlackLib::NonBlock );
-//	uint8_t result = mySpi.transfer(0x00);
-//	printf("ADXL345 Device ID (Reg 0x00): %x\n", result);
+	BlackLib::BlackSPI mySpi(BlackLib::SPI1_0, 8, BlackLib::SpiDefault, 100000);
+	mySpi.open( BlackLib::ReadWrite | BlackLib::NonBlock );
+	uint8_t result = mySpi.transfer(0x0F);	// expected: 0b11010011
+	printf("L3G4200D Device ID (0x0F): %x\n", result);
+
 	ADX::ADXL345 adx;
 	printf("\nDevice ID: %X\n", adx.getDeviceID());
 	return 0;
