@@ -16,6 +16,7 @@
 #include "BlackLib/BlackSPI/BlackSPI.h"
 #include "../include/HMC5883L.h"
 #include "../include/ADXL345.h"
+#include "../include/L3G4200D.h"
 #include <unistd.h>
 
 using namespace std;
@@ -40,10 +41,14 @@ int main() {
 	cout << "Y: " << data.y << endl;
 	cout << "Z: " << data.z << endl;
 
-//	BlackLib::BlackSPI mySpi(BlackLib::SPI1_0, 8, BlackLib::SpiMode3, 100000);
-//	mySpi.open( BlackLib::ReadWrite | BlackLib::NonBlock );
-//	uint8_t result = mySpi.transfer(0x0F, 100);	// expected: 0b11010011
-//	printf("L3G4200D ID (0x0F): %x\n", result);
+	L3G::L3G4200D l3g(L3G::dps_500);
+	printf("L3G4200D ID (0x0F): %x\n", l3g.getDeviceID());
+	printf("L3G4200D Range: %x\n", l3g.getMeasurementRange());
+	for (int i = 0; i < 100; i ++) {
+		L3G::DPS d = l3g.getDPS();
+		cout << d.toString() << endl;
+		usleep(50 * 1000);
+	}
 
 	ADX::ADXL345 adx;
 	adx.setDataFormat(0x08);
