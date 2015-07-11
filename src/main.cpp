@@ -16,6 +16,7 @@
 #include "BlackLib/BlackSPI/BlackSPI.h"
 #include "../include/HMC5883L.h"
 #include "../include/ADXL345.h"
+#include <unistd.h>
 
 using namespace std;
 
@@ -39,14 +40,22 @@ int main() {
 	cout << "Y: " << data.y << endl;
 	cout << "Z: " << data.z << endl;
 
-	BlackLib::BlackSPI mySpi(BlackLib::SPI1_0, 8, BlackLib::SpiMode3, 100000);
-	mySpi.open( BlackLib::ReadWrite | BlackLib::NonBlock );
-	uint8_t result = mySpi.transfer(0x0F, 100);	// expected: 0b11010011
-	printf("L3G4200D ID (0x0F): %x\n", result);
+//	BlackLib::BlackSPI mySpi(BlackLib::SPI1_0, 8, BlackLib::SpiMode3, 100000);
+//	mySpi.open( BlackLib::ReadWrite | BlackLib::NonBlock );
+//	uint8_t result = mySpi.transfer(0x0F, 100);	// expected: 0b11010011
+//	printf("L3G4200D ID (0x0F): %x\n", result);
 
 	ADX::ADXL345 adx;
-	adx.getXYZ();
+	adx.setDataFormat(0x08);
+	adx.setPowerCtrl(0x08);
+	adx.setInterruptEnable(0x80);
+	for (int i = 0; i < 10; i ++) {
+		ADX::Data d = adx.getXYZ();
+		cout << d.toString() << endl;
+		usleep(100 * 1000);
+	}
+
 	printf("\nADXL Device ID: %X\n", adx.getDeviceID());
-	printf("Threshold Tap: %X\n", adx.getThresholdTap());
+	printf("Thresh Tap: %X\n", adx.getThresholdTap());
 	return 0;
 }

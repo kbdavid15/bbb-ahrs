@@ -44,6 +44,8 @@
 #define FIFO_STATUS		0x39
 
 #include "../src/BlackLib/BlackSPI/BlackSPI.h"
+#include <string>
+#include <sstream>
 
 namespace ADX
 {
@@ -51,6 +53,14 @@ namespace ADX
 		int16_t x;
 		int16_t y;
 		int16_t z;
+
+		std::string toString() {
+			std::stringstream ss;
+			ss << "X: " << x << "\t";
+			ss << "Y: " << y << "\t";
+			ss << "Z: " << z;
+			return ss.str();
+		}
 	};
 
 	class ADXL345
@@ -96,8 +106,8 @@ namespace ADX
 		void setDataRatePwrModeCtrl(unsigned char);
 		unsigned char getPowerCtrl();
 		void setPowerCtrl(unsigned char);
-		unsigned char getInterruptCtrl();
-		void setInterruptCtrl(unsigned char);
+		unsigned char getInterruptEnable();
+		void setInterruptEnable(unsigned char);
 		unsigned char getInterruptMapCtrl();
 		void setInterruptMapCtrl(unsigned char);
 		unsigned char getInterruptSource();
