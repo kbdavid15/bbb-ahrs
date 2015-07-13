@@ -11,10 +11,27 @@
 /* HMC5883L - 3-Axis Digital Compass IC
  * Connected via I2C
  * Register Definitions
++---------+----------------------------+------------+
+| Address |            Name            |   Access   |
++---------+----------------------------+------------+
+|      00 | Configuration Register A   | Read/Write |
+|      01 | Configuration Register B   | Read/Write |
+|      02 | Mode Register              | Read/Write |
+|      03 | Data Output X MSB Register | Read       |
+|      04 | Data Output X LSB Register | Read       |
+|      05 | Data Output Z MSB Register | Read       |
+|      06 | Data Output Z LSB Register | Read       |
+|      07 | Data Output Y MSB Register | Read       |
+|      08 | Data Output Y LSB Register | Read       |
+|      09 | Status Register            | Read       |
+|      10 | Identification Register A  | Read       |
+|      11 | Identification Register B  | Read       |
+|      12 | Identification Register C  | Read       |
++---------+----------------------------+------------+
  */
-#define HMC_DEVICE_ADDRESS	0x1E
-#define HMC_READ_ADDRESS 	0x3D
-#define HMC_WRITE_ADDRESS 	0x3C
+#define HMC_DEVICE_ADDRESS	0x1E	// 7 bit address
+#define HMC_READ_ADDRESS 	0x3D	// (0x1E << 1) | 0x01
+#define HMC_WRITE_ADDRESS 	0x3C	// (0x1E << 1)
 #define HMC_CONFIG_REG_A	0x00
 #define HMC_CONFIG_REG_B	0x01
 #define HMC_MODE_REG		0x02
@@ -26,6 +43,8 @@
 #define HMC_ID_REG_B		0x0B
 #define HMC_ID_REG_C		0x0C
 
+#define GAIN_BIT_OFFSET		5		// shift gain value left 5 bits for register value
+
 #include "../include/myi2c.h"
 #include <string>
 #include <sstream>
@@ -36,6 +55,20 @@ namespace HMC {
 	const unsigned char AVG_SAMPLES_2	= 0b00100000;
 	const unsigned char AVG_SAMPLES_4	= 0b01000000;
 	const unsigned char AVG_SAMPLES_8	= 0b01100000;
+	/*
+	+-----+-----+-----+------------------+
+	| DO2 | DO1 | DO0 | Output Rate (Hz) |
+	+-----+-----+-----+------------------+
+	|   0 |   0 |   0 | 0.75             |
+	|   0 |   0 |   1 | 1.5              |
+	|   0 |   1 |   0 | 3                |
+	|   0 |   1 |   1 | 7.5              |
+	|   1 |   0 |   0 | 15 (Default)     |
+	|   1 |   0 |   1 | 30               |
+	|   1 |   1 |   0 | 75               |
+	|   1 |   1 |   1 | Reserved         |
+	+-----+-----+-----+------------------+
+	 */
 	const unsigned char DATA_RATE_0_75	= 0b00000000;
 	const unsigned char DATA_RATE_1_5	= 0b00000100;
 	const unsigned char DATA_RATE_3		= 0b00001000;
@@ -48,17 +81,78 @@ namespace HMC {
 	const unsigned char MEAS_MODE_NEG	= 0b00000010;
 	const unsigned char CRA_DEFAULT		= 0x10;
 
+	/*
+	+-----+-----+-----+-------------------+-------------------+---------------------+-----------------------------+
+	| GN2 | GN1 | GN0 | Recommended Range | Gain (LSb/ Gauss) | Resolution (mG/LSb) |        Output Range         |
+	+-----+-----+-----+-------------------+-------------------+---------------------+-----------------------------+
+	|   0 |   0 |   0 | ± 0.88 Ga         | 1370              | 0.73                | 0xF800–0x07FF (-2048–2047 ) |
+	|   0 |   0 |   1 | ± 1.3 Ga          | 1090 (default)    | 0.92                | 0xF800–0x07FF (-2048–2047 ) |
+	|   0 |   1 |   0 | ± 1.9 Ga          | 820               | 1.22                | 0xF800–0x07FF (-2048–2047 ) |
+	|   0 |   1 |   1 | ± 2.5 Ga          | 660               | 1.52                | 0xF800–0x07FF (-2048–2047 ) |
+	|   1 |   0 |   0 | ± 4.0 Ga          | 440               | 2.27                | 0xF800–0x07FF (-2048–2047 ) |
+	|   1 |   0 |   1 | ± 4.7 Ga          | 390               | 2.56                | 0xF800–0x07FF (-2048–2047 ) |
+	|   1 |   1 |   0 | ± 5.6 Ga          | 330               | 3.03                | 0xF800–0x07FF (-2048–2047 ) |
+	|   1 |   1 |   1 | ± 8.1 Ga          | 230               | 4.35                | 0xF800–0x07FF (-2048–2047 ) |
+	+-----+-----+-----+-------------------+-------------------+---------------------+-----------------------------+
+	*/
 	// Config Register B Bitmasks
-	enum Gain : unsigned char {
-		GAIN_1370		= 0b00000000,
-		GAIN_1090		= 0b00100000,
-		GAIN_820		= 0b01000000,
-		GAIN_660		= 0b01100000,
-		GAIN_440		= 0b10000000,
-		GAIN_390		= 0b10100000,
-		GAIN_330		= 0b11000000,
-		GAIN_230		= 0b11100000,
-		GAIN_DEFAULT	= 0x20
+//	enum GainValue : unsigned char {
+//		GAIN_1370		= 0b00000000,
+//		GAIN_1090		= 0b00100000,
+//		GAIN_820		= 0b01000000,
+//		GAIN_660		= 0b01100000,
+//		GAIN_440		= 0b10000000,
+//		GAIN_390		= 0b10100000,
+//		GAIN_330		= 0b11000000,
+//		GAIN_230		= 0b11100000,
+//		GAIN_DEFAULT	= 0x20
+//	};
+	enum GainIdx : unsigned char {
+		GAIN_0,
+		GAIN_1,
+		GAIN_2,
+		GAIN_3,
+		GAIN_4,
+		GAIN_5,
+		GAIN_6,
+		GAIN_7
+	};
+	struct Gain {
+		GainIdx	gIdx;
+		GainIdx	prevGain;
+		bool 	updateFlag;
+
+		unsigned char getConfigRegB() {
+			return (gIdx << GAIN_BIT_OFFSET);
+		}
+		Gain(GainIdx idx) {
+			gIdx = idx;
+			prevGain = idx;
+			updateFlag = true;
+		}
+		Gain() {
+			init();
+		}
+		void updateIdx(GainIdx idx) {
+			if (idx != gIdx) {
+				prevGain = gIdx;
+				gIdx = idx;
+				updateFlag = true;
+			} else {
+				updateFlag = false;
+			}
+		}
+		void init() {
+			gIdx = GAIN_1;	// default
+			prevGain = GAIN_1;
+			updateFlag = false;
+		}
+		GainIdx incrementIdx() {
+			unsigned char i = (unsigned char)gIdx;
+			i++;
+			gIdx = (GainIdx)i;
+			return gIdx;
+		}
 	};
 
 	enum AvgSamples {
@@ -67,6 +161,7 @@ namespace HMC {
 		AvgSamples4,
 		AvgSamples8
 	};
+
 	enum DataRate {
 		DataRate_0_75,
 		DataRate_1_5,
@@ -94,6 +189,9 @@ namespace HMC {
 			mode = m;
 		}
 	};
+	struct SelfTestCal {
+		int16_t X_STP, Y_STP, Z_STP;
+	};
 	struct Data {
 		int16_t x;
 		int16_t y;
@@ -109,16 +207,18 @@ namespace HMC {
 		Idle
 	};
 
-	class HMC5883L
-	{
+	class HMC5883L	{
+		const static uint16_t LSB_PER_GAUSS[];
 	private:
+
 		i2cDevice *device;
 		Gain _gain;
-		Gain _previousGain = GAIN_DEFAULT;
+//		GainValue _gainValue;
+//		GainValue _previousGain = GAIN_DEFAULT;
 		bool _gainChangeFlag;
 	public:
 		HMC5883L();
-		HMC5883L(Gain gain);
+		HMC5883L(GainIdx gain);
 		~HMC5883L();
 
 		std::string getDeviceID();
@@ -126,7 +226,7 @@ namespace HMC {
 		Gain getConfigRegB();
 		void setConfigRegA(unsigned char flags);
 		void setConfigRegA(ConfigRegA reg);
-		void setConfigRegB(Gain gain);
+		void setConfigRegB(GainIdx gain);
 		OperatingMode getModeRegister();
 		void setModeRegister(OperatingMode mode);
 		int16_t getDataX();

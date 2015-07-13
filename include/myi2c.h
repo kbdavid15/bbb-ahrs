@@ -34,6 +34,6 @@ public:
 	void seti2cAddress(unsigned char address);
 	void sendByte(unsigned char REG_ADDR, unsigned char DATA);
 	unsigned char readByte(unsigned char REG_ADDR);
-	unsigned char readBytes(unsigned char REG_ADDR, size_t n);
+	unsigned char readBytes(unsigned char REG_ADDR, ssize_t n);
 };
 #endif /* LIB_MYI2C_H_ */

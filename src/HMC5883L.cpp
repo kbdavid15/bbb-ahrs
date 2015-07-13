@@ -11,14 +11,23 @@
 using namespace std;
 
 namespace HMC {
+
+	const uint16_t HMC5883L::LSB_PER_GAUSS[] = { 1370, 1090, 820, 660, 440, 390, 330, 230 };
+
 	HMC5883L::HMC5883L() {
 		device = new i2cDevice(HMC_DEVICE_ADDRESS);
-		_gain = GAIN_DEFAULT;
+		_gain.gIdx = GAIN_1;
+		_gain.updateFlag = false;
+		_gain.prevGain = GAIN_1;
+		if (!runSelfTest()) {
+			cout << "Error: self test failed" << endl;
+		}
 	}
-	HMC5883L::HMC5883L(Gain gain) {
+	HMC5883L::HMC5883L(GainIdx gain) {
 		device = new i2cDevice(HMC_DEVICE_ADDRESS);
-		_gain = gain;
-		setConfigRegB(gain);
+		_gain.init();
+		_gain.updateIdx(gain);
+		setConfigRegB(_gain.gIdx);
 	}
 	HMC5883L::~HMC5883L() {
 		cout << "HMC obj deleted" << endl;
@@ -42,11 +51,14 @@ namespace HMC {
 		//device->sendByte(HMC_CONFIG_REG_A, (char*)&reg);
 	}
 	Gain HMC5883L::getConfigRegB() {
-		return (Gain)device->readByte(HMC_CONFIG_REG_B);
+		unsigned char regB = device->readByte(HMC_CONFIG_REG_B);
+		GainIdx idx = (GainIdx)(regB >> GAIN_BIT_OFFSET);
+		_gain.updateIdx(idx);
+		return _gain;
 	}
-	void HMC5883L::setConfigRegB(Gain gain) {
-		this->_gain = gain;
-		device->sendByte(HMC_CONFIG_REG_B, gain);
+	void HMC5883L::setConfigRegB(GainIdx gain) {
+		_gain.updateIdx(gain);
+		device->sendByte(HMC_CONFIG_REG_B, (gain << GAIN_BIT_OFFSET));
 	}
 	OperatingMode HMC5883L::getModeRegister() {
 		unsigned char mode = device->readByte(HMC_MODE_REG);
@@ -95,7 +107,7 @@ namespace HMC {
 	bool HMC5883L::runSelfTest() {
 		// positive self-test process using continuous measurement mode
 		setConfigRegA(AVG_SAMPLES_8 | DATA_RATE_15 | MEAS_MODE_POS);
-		setConfigRegB(GAIN_820);
+		setConfigRegB(GAIN_5);
 		setModeRegister(ContinuousMeasurement);
 		// wait until data ready
 		uint8_t counter = 0;
@@ -106,6 +118,31 @@ namespace HMC {
 				return false;
 			}
 		}
-
+		// read data ( if recently changed the gain do extra read to reset)
+		if (_gain.updateFlag)
+		{
+			getDataXYZ();
+			_gain.updateFlag = false;
+		}
+		while (true) {
+			Data d = getDataXYZ();
+			int upperLimit = 575 * LSB_PER_GAUSS[_gain.gIdx] / 390;
+			int lowerLimit = 243 * LSB_PER_GAUSS[_gain.gIdx] / 390;
+			if (	((d.x <= upperLimit) && (d.x >= lowerLimit)) |
+					((d.y <= upperLimit) && (d.y >= lowerLimit)) |
+					((d.z <= upperLimit) && (d.z >= lowerLimit)) )	{
+				// test passed
+				setConfigRegA( CRA_DEFAULT | MEAS_MODE_NORM );
+				return true;
+			} else {
+				if (_gain.gIdx < GAIN_7) {
+					setConfigRegB(_gain.incrementIdx());
+				}
+				else {
+					setConfigRegA( CRA_DEFAULT | MEAS_MODE_NORM );
+					return false;
+				}
+			}
+		}
 	}
 }

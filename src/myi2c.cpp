@@ -12,6 +12,7 @@ using namespace std;
 
 i2cDevice::i2cDevice() {
 	this->i2cOpen();
+	_address = 0;
 }
 
 i2cDevice::i2cDevice(unsigned char DEVICE_ADDRESS) {
@@ -79,7 +80,7 @@ unsigned char i2cDevice::readByte(unsigned char Reg_ADDR){
 	return i2c_read_buffer[0];
 }
 
-unsigned char i2cDevice::readBytes(unsigned char Reg_ADDR, size_t n){
+unsigned char i2cDevice::readBytes(unsigned char Reg_ADDR, ssize_t n){
 	i2c_write_buffer[0] = Reg_ADDR;
 
 	//seti2cAddress(DEVICE_ADDR);

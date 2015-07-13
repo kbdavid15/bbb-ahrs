@@ -31,19 +31,19 @@ void timer_handler(int signum) {
 
 int main() {
 
-	struct sigaction sa;
-	struct itimerval timer;
-	memset ( &sa, 0, sizeof ( sa ) );
-
-	sa.sa_handler = &timer_handler;
-	sigaction ( SIGALRM, &sa, NULL );
-
-	timer.it_value.tv_sec = 0;
-	timer.it_value.tv_usec = 10000;
-	timer.it_interval.tv_sec = 0;
-	timer.it_interval.tv_usec = 10000;
-
-	setitimer ( ITIMER_REAL, &timer, NULL );
+//	struct sigaction sa;
+//	struct itimerval timer;
+//	memset ( &sa, 0, sizeof ( sa ) );
+//
+//	sa.sa_handler = &timer_handler;
+//	sigaction ( SIGALRM, &sa, NULL );
+//
+//	timer.it_value.tv_sec = 0;
+//	timer.it_value.tv_usec = 10000;
+//	timer.it_interval.tv_sec = 0;
+//	timer.it_interval.tv_usec = 10000;
+//
+//	setitimer ( ITIMER_REAL, &timer, NULL );
 
 	// create device objects and initialize
 	HMC::HMC5883L hmc;
