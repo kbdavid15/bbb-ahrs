@@ -120,7 +120,7 @@ namespace L3G {
 		DPS getDPS();
 		CR4_MeasureRange getMeasurementRange();
 		void setMeasurementRange(CR4_MeasureRange);
-
+		unsigned char getTemperature();
 
 
 	};

@@ -68,4 +68,10 @@ namespace L3G {
 		spi.transfer(sendBytes, recBytes, sizeof(sendBytes));
 		return (CR4_MeasureRange)(recBytes[1] & 0b00110000);
 	}
+	unsigned char L3G4200D::getTemperature() {
+		uint8_t sendBytes[2] = { OUT_TEMP | BYTE_READ, 0x00 };
+		uint8_t recvBytes[2];
+		spi.transfer(sendBytes, recvBytes, sizeof(sendBytes));
+		return recvBytes[1];
+	}
 }

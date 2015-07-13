@@ -49,15 +49,17 @@ namespace HMC {
 	const unsigned char CRA_DEFAULT		= 0x10;
 
 	// Config Register B Bitmasks
-	const unsigned char GAIN_1370		= 0b00000000;
-	const unsigned char GAIN_1090		= 0b00100000;
-	const unsigned char GAIN_820		= 0b01000000;
-	const unsigned char GAIN_660		= 0b01100000;
-	const unsigned char GAIN_440		= 0b10000000;
-	const unsigned char GAIN_390		= 0b10100000;
-	const unsigned char GAIN_330		= 0b11000000;
-	const unsigned char GAIN_230		= 0b11100000;
-	const unsigned char CRB_DEFAULT		= 0x20;
+	enum Gain : unsigned char {
+		GAIN_1370		= 0b00000000,
+		GAIN_1090		= 0b00100000,
+		GAIN_820		= 0b01000000,
+		GAIN_660		= 0b01100000,
+		GAIN_440		= 0b10000000,
+		GAIN_390		= 0b10100000,
+		GAIN_330		= 0b11000000,
+		GAIN_230		= 0b11100000,
+		GAIN_DEFAULT	= 0x20
+	};
 
 	enum AvgSamples {
 		AvgSamples1,
@@ -109,18 +111,22 @@ namespace HMC {
 
 	class HMC5883L
 	{
+	private:
 		i2cDevice *device;
-
+		Gain _gain;
+		Gain _previousGain = GAIN_DEFAULT;
+		bool _gainChangeFlag;
 	public:
 		HMC5883L();
+		HMC5883L(Gain gain);
 		~HMC5883L();
 
 		std::string getDeviceID();
 		unsigned char getConfigRegA();
-		unsigned char getConfigRegB();
+		Gain getConfigRegB();
 		void setConfigRegA(unsigned char flags);
 		void setConfigRegA(ConfigRegA reg);
-		void setConfigRegB(unsigned char flags);
+		void setConfigRegB(Gain gain);
 		OperatingMode getModeRegister();
 		void setModeRegister(OperatingMode mode);
 		int16_t getDataX();
@@ -128,6 +134,7 @@ namespace HMC {
 		int16_t getDataZ();
 		Data getDataXYZ();
 		Status getStatus();
+		bool runSelfTest();
 	};
 }
 
