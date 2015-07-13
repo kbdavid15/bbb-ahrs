@@ -196,6 +196,13 @@ namespace HMC {
 		int16_t x;
 		int16_t y;
 		int16_t z;
+		std::string toString() {
+			std::stringstream ss;
+			ss << "X: " << x << "\t";
+			ss << "Y: " << y << "\t";
+			ss << "Z: " << z;
+			return ss.str();
+		}
 	};
 	struct Status {
 		bool DataLocked;
@@ -233,8 +240,10 @@ namespace HMC {
 		int16_t getDataY();
 		int16_t getDataZ();
 		Data getDataXYZ();
+		Data getDataReadyXYZ(uint16_t timeout = 100);	//blocking function, returns data when it's ready
 		Status getStatus();
 		bool runSelfTest();
+		unsigned char * dumpAllRegisters();
 	};
 }
 

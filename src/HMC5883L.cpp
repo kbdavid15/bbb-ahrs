@@ -21,7 +21,11 @@ namespace HMC {
 		_gain.prevGain = GAIN_1;
 		if (!runSelfTest()) {
 			cout << "Error: self test failed" << endl;
+
+		} else {
+			cout << "Self test passed" << endl;
 		}
+		dumpAllRegisters();
 	}
 	HMC5883L::HMC5883L(GainIdx gain) {
 		device = new i2cDevice(HMC_DEVICE_ADDRESS);
@@ -97,6 +101,19 @@ namespace HMC {
 		d.y = ((device->i2c_read_buffer[4] << 8) + (device->i2c_read_buffer[5]));
 		return d;
 	}
+	Data HMC5883L::getDataReadyXYZ(uint16_t timeout) {
+		uint16_t counter = 0;
+		while (!getStatus().DataReady) {
+			if (counter >= timeout) {
+				cout << "Error: Timeout in getDataReadyXYZ()" << endl;
+				break;
+			}
+			counter++;
+			usleep(1000);
+		}
+
+		return getDataXYZ();
+	}
 	Status HMC5883L::getStatus() {
 		unsigned char statusReg = device->readByte(HMC_STATUS_REG);
 		Status status;
@@ -125,7 +142,9 @@ namespace HMC {
 			_gain.updateFlag = false;
 		}
 		while (true) {
-			Data d = getDataXYZ();
+			Data d = getDataReadyXYZ();
+
+			cout << d.toString() << endl;
 			int upperLimit = 575 * LSB_PER_GAUSS[_gain.gIdx] / 390;
 			int lowerLimit = 243 * LSB_PER_GAUSS[_gain.gIdx] / 390;
 			if (	((d.x <= upperLimit) && (d.x >= lowerLimit)) |
@@ -144,5 +163,14 @@ namespace HMC {
 				}
 			}
 		}
+	}
+	unsigned char * HMC5883L::dumpAllRegisters() {
+		uint8_t numRegisters = 13;
+		device->readBytes(HMC_CONFIG_REG_A, numRegisters);
+		for (uint8_t i = 0; i < numRegisters; i++) {
+			printf("0x%X ", device->i2c_read_buffer[i]);
+		}
+		cout << endl;
+		return device->i2c_read_buffer;
 	}
 }
