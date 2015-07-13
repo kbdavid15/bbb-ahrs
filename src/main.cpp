@@ -12,8 +12,8 @@
 #include <unistd.h>
 
 #include "../include/myi2c.h"
-//#include "../include/regaddr.h"
-#include "BlackLib/BlackSPI/BlackSPI.h"
+//#includ e "../include/regaddr.h"
+#include "../include/BlackLib/BlackSPI/BlackSPI.h"
 #include "../include/HMC5883L.h"
 #include "../include/ADXL345.h"
 #include "../include/L3G4200D.h"
@@ -58,7 +58,7 @@ int main() {
 	adx.setInterruptEnable(0x80);
 
 
-	// main program loop
+	// main progr am loop
 	while (true)
 	{
 		if (updateDataFlag)

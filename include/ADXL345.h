@@ -43,7 +43,7 @@
 #define FIFO_CTL		0x38
 #define FIFO_STATUS		0x39
 
-#include "../src/BlackLib/BlackSPI/BlackSPI.h"
+#include "../include/BlackLib/BlackSPI/BlackSPI.h"
 #include <string>
 #include <sstream>
 

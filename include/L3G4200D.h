@@ -48,7 +48,7 @@
 #define DPS_CONV_2000	0.07
 
 
-#include "../src/BlackLib/BlackSPI/BlackSPI.h"
+#include "../include/BlackLib/BlackSPI/BlackSPI.h"
 #include <string>
 #include <sstream>
 
