@@ -31,65 +31,59 @@ void timer_handler(int signum) {
 
 int main() {
 
-//	struct sigaction sa;
-//	struct itimerval timer;
-//	memset ( &sa, 0, sizeof ( sa ) );
-//
-//	sa.sa_handler = &timer_handler;
-//	sigaction ( SIGALRM, &sa, NULL );
-//
-//	timer.it_value.tv_sec = 0;
-//	timer.it_value.tv_usec = 10000;
-//	timer.it_interval.tv_sec = 0;
-//	timer.it_interval.tv_usec = 10000;
-//
-//	setitimer ( ITIMER_REAL, &timer, NULL );
+	struct sigaction sa;
+	struct itimerval timer;
+	memset ( &sa, 0, sizeof ( sa ) );
+
+	sa.sa_handler = &timer_handler;
+	sigaction ( SIGALRM, &sa, NULL );
+
+	timer.it_value.tv_sec = 0;
+	timer.it_value.tv_usec = 100000;
+	timer.it_interval.tv_sec = 0;
+	timer.it_interval.tv_usec = 100000;
+
+	setitimer ( ITIMER_REAL, &timer, NULL );
 
 	// create device objects and initialize
 	HMC::HMC5883L hmc;
 	hmc.setModeRegister(HMC::ContinuousMeasurement);
-	//hmc.setConfigRegA(HMC::AVG_SAMPLES_4 | HMC::DATA_RATE_15 | HMC::MEAS_MODE_NORM);
+	hmc.setConfigRegA(HMC::DATA_RATE_75 | HMC::MEAS_MODE_NORM);
+	hmc.setConfigRegB(HMC::GAIN_0);
 
 	L3G::L3G4200D l3g(L3G::dps_500);
 
 	ADX::ADXL345 adx;
-	adx.setDataFormat(0x08);
-	adx.setPowerCtrl(0x08);
-	adx.setInterruptEnable(0x80);
+	ADX::DataFormat format;
+	format.fullRes = 1;
+	adx.setDataFormat(format);	// value of 0x0B sets full resolution mode and range to +/- 16g
+	adx.setPowerCtrl(0x08);		// value of 0x08 enables measurement mode
+	adx.setInterruptEnable(0x80);	// value of 0x80 enables DataReady bit
 
+	printf("ADX Device ID: 0x%X\n",adx.getDeviceID());
 
-	// main progr am loop
+	// main program loop
 	while (true)
 	{
 		if (updateDataFlag)
 		{
-			if (hmc.getStatus().DataReady)
-			{
-				HMC::Data data = hmc.getDataXYZ();
-				cout << "X: " << data.x << "\t";
-				cout << "Y: " << data.y << "\t";
-				cout << "Z: " << data.z << endl;
-			}
-			else {
-				cout << "Data not ready" << endl;
-			}
+//			if (hmc.getStatus().DataReady)
+//			{
+//				HMC::Data data = hmc.getDataXYZ();
+//				cout << data.toString(false) << endl;
+//				printf("Heading (deg): %f\n", data.getHeadingDeg());
+//			}
+//			else {
+//				cout << "Data not ready" << endl;
+//			}
 
-//			ADX::Data d = adx.getXYZ();
-//			cout << d.toString() << endl;
-
+			ADX::Data d = adx.getXYZ();
+			cout << d.toString() << endl;
 
 			updateDataFlag = false;
 		}
 	}
 
-//	cout << "Data Locked: " << hmc.getStatus().DataLocked << endl;
-//	cout << "Data Ready: " << hmc.getStatus().DataReady << endl;
-//	HMC::Data data = hmc.getDataXYZ();
-//	cout << "X: " << data.x << endl;
-//	cout << "Y: " << data.y << endl;
-//	cout << "Z: " << data.z << endl;
-//
-//
 //	printf("L3G4200D ID (0x0F): %x\n", l3g.getDeviceID());
 //	printf("L3G4200D Range: %x\n", l3g.getMeasurementRange());
 //	printf("Temperature: %d\n", l3g.getTemperature());

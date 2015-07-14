@@ -16,16 +16,14 @@ namespace HMC {
 
 	HMC5883L::HMC5883L() {
 		device = new i2cDevice(HMC_DEVICE_ADDRESS);
-		_gain.gIdx = GAIN_1;
-		_gain.updateFlag = false;
-		_gain.prevGain = GAIN_1;
+		_gain = getConfigRegB();
+		_gain.updateIdx(GAIN_1);
 		if (!runSelfTest()) {
 			cout << "Error: self test failed" << endl;
 
 		} else {
 			cout << "Self test passed" << endl;
 		}
-		dumpAllRegisters();
 	}
 	HMC5883L::HMC5883L(GainIdx gain) {
 		device = new i2cDevice(HMC_DEVICE_ADDRESS);
@@ -95,10 +93,18 @@ namespace HMC {
 //	}
 	Data HMC5883L::getDataXYZ() {
 		device->readBytes(HMC_DATA_2B_START_X, 6);
-		Data d;
-		d.x = ((device->i2c_read_buffer[0] << 8) + (device->i2c_read_buffer[1]));
-		d.z = ((device->i2c_read_buffer[2] << 8) + (device->i2c_read_buffer[3]));
-		d.y = ((device->i2c_read_buffer[4] << 8) + (device->i2c_read_buffer[5]));
+		int16_t x = ((device->i2c_read_buffer[0] << 8) + (device->i2c_read_buffer[1]));
+		int16_t z = ((device->i2c_read_buffer[2] << 8) + (device->i2c_read_buffer[3]));
+		int16_t y = ((device->i2c_read_buffer[4] << 8) + (device->i2c_read_buffer[5]));
+		GainIdx dataGain;
+		if (_gain.updateFlag) {
+			// use previous gain
+			dataGain = _gain.prevGain;
+			_gain.updateFlag = false;
+		} else {
+			dataGain = _gain.gIdx;
+		}
+		Data d(x, y, z, LSB_PER_GAUSS[dataGain]);
 		return d;
 	}
 	Data HMC5883L::getDataReadyXYZ(uint16_t timeout) {
@@ -123,9 +129,9 @@ namespace HMC {
 	}
 	bool HMC5883L::runSelfTest() {
 		// positive self-test process using continuous measurement mode
-		setConfigRegA(AVG_SAMPLES_8 | DATA_RATE_15 | MEAS_MODE_POS);
+		setConfigRegA(AVG_SAMPLES_8 | DATA_RATE_75 | MEAS_MODE_POS);
 		setConfigRegB(GAIN_5);
-		setModeRegister(ContinuousMeasurement);
+		setModeRegister(SingleMeasurement);
 		// wait until data ready
 		uint8_t counter = 0;
 		while (!getStatus().DataReady) {
@@ -143,8 +149,6 @@ namespace HMC {
 		}
 		while (true) {
 			Data d = getDataReadyXYZ();
-
-			cout << d.toString() << endl;
 			int upperLimit = 575 * LSB_PER_GAUSS[_gain.gIdx] / 390;
 			int lowerLimit = 243 * LSB_PER_GAUSS[_gain.gIdx] / 390;
 			if (	((d.x <= upperLimit) && (d.x >= lowerLimit)) |
@@ -152,9 +156,11 @@ namespace HMC {
 					((d.z <= upperLimit) && (d.z >= lowerLimit)) )	{
 				// test passed
 				setConfigRegA( CRA_DEFAULT | MEAS_MODE_NORM );
+				cout << "Passed @ Gain: " << _gain.gIdx << "\t" << d.toString() << endl;
 				return true;
 			} else {
 				if (_gain.gIdx < GAIN_7) {
+					cout << "Failed @ Gain: " << _gain.gIdx << "\t" << d.toString() << endl;
 					setConfigRegB(_gain.incrementIdx());
 				}
 				else {

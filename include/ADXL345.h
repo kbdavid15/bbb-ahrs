@@ -43,6 +43,13 @@
 #define FIFO_CTL		0x38
 #define FIFO_STATUS		0x39
 
+#define SELF_TEST_MIN_X_16	6
+#define SELF_TEST_MAX_X_16	67
+#define SELF_TEST_MIN_Y_16	-67
+#define SELF_TEST_MAX_Y_16	-6
+#define SELF_TEST_MIN_Z_16	10
+#define SELF_TEST_MAX_Z_16	110
+
 #include "../include/BlackLib/BlackSPI/BlackSPI.h"
 #include <string>
 #include <sstream>
@@ -62,10 +69,109 @@ namespace ADX
 			return ss.str();
 		}
 	};
+/*	+----------+---------+-----------+
+	| ODR (Hz) | BW (Hz) | Rate Code |
+	+----------+---------+-----------+
+	| 3200     | 1600    |      1111 |
+	| 1600     | 800     |      1110 |
+	| 800      | 400     |      1101 |
+	| 400      | 200     |      1100 |
+	| 200      | 100     |      1011 |
+	| 100      | 50      |      1010 |
+	| 50       | 25      |      1001 |
+	| 25       | 12.5    |      1000 |
+	| 12.5     | 6.25    |      0111 |
+	| 6.25     | 3.125   |      0110 |
+	+----------+---------+-----------+	*/
+	enum DataRate : uint8_t {
+		ODR_3200 	= 0b1111,
+		ODR_1600 	= 0b1110,
+		ODR_800 	= 0b1101,
+		ODR_400 	= 0b1100,
+		ODR_200 	= 0b1011,
+		ODR_100 	= 0b1010,
+		ODR_50 		= 0b1001,
+		ODR_25 		= 0b1000,
+		ODR_12_5 	= 0b0111,
+		ODR_6_25 	= 0b0110
+	};
+/*	+----+----+----+-----------+----+----+----+----+
+	| D7 | D6 | D5 |     D4    | D3 | D2 | D1 | D0 |
+	+----+----+----+-----------+----+----+----+----+
+	|  0 |  0 |  0 | LOW_POWER |        Rate       |
+	+----+----+----+-----------+-------------------+	*/
+	struct PwrDataRate {
+		bool lowPowerMode;
+		DataRate dataRate;
+		PwrDataRate(bool lowPowerMode, DataRate rate) {
+			this->lowPowerMode = lowPowerMode;
+			this->dataRate = rate;
+		}
+		PwrDataRate(uint8_t reg) {
+			lowPowerMode = (reg >> 4) & 0x01;
+			dataRate = (DataRate)(reg & 0x0F);
+		}
+		uint8_t getByteFormat() {
+			uint8_t bt = dataRate;
+			bt |= lowPowerMode ? 1 : 0;		// sets the low power mode bit to 1 if true
+			return bt;
+		}
+	};
+
+
+/*	+----+----+---------+
+	| D1 | D0 | g Range |
+	+----+----+---------+
+	|  0 |  0 | ±2 g    |
+	|  0 |  1 | ±4 g    |
+	|  1 |  0 | ±8 g    |
+	|  1 |  1 | ±16 g   |
+	+----+----+---------+	*/
+	enum DataRange : uint8_t {
+		DataRange2g,
+		DataRange4g,
+		DataRange8g,
+		DataRange16g
+	};
+
+
+/*	+-----------+-----+------------+----+----------+---------+----+----+
+	| D7        | D6  | D5         | D4 | D3       | D2      | D1 | D0 |
+	+-----------+-----+------------+----+----------+---------+----+----+
+	| SELF_TEST | SPI | INT_INVERT | 0  | FULL_RES | Justify | Range   |
+	+-----------+-----+------------+----+----------+---------+---------+	*/
+	struct DataFormat {
+		uint8_t selfTest = 0;
+		uint8_t spiMode  = 0;
+		uint8_t intInvert= 0;
+		uint8_t fullRes	 = 0;
+		uint8_t justify  = 0;
+		DataRange range	 = DataRange2g;
+
+		DataFormat() { }
+		DataFormat(uint8_t data) {
+			selfTest = (data & 0x80) >> 7;
+			spiMode  = (data & 0x40) >> 6;
+			intInvert= (data & 0x20) >> 5;
+			fullRes  = (data & 0x08) >> 3;
+			justify  = (data & 0x04) >> 2;
+			range 	 = (DataRange)(data & 0x03);
+		}
+
+		uint8_t getData() {
+			return ((selfTest << 7)  | (spiMode << 6) |
+					(intInvert << 5) | (fullRes << 3) |
+					(justify << 2)   | (range << 1));
+		}
+	};
 
 	class ADXL345
 	{
+	private:
+
 		BlackLib::BlackSPI spi;
+		unsigned char readByte(unsigned char REG_ADDR);
+		void writeByte(unsigned char REG_ADDR, unsigned char data);
 
 	public:
 		ADXL345();
@@ -96,14 +202,13 @@ namespace ADX
 		void setAxisEnableControl(unsigned char);
 		unsigned char getFreeFallThreshold();
 		void setFreeFallThreshold(unsigned char thresh);
-
 		unsigned char getFreeFallTime();
 		void setFreeFallTime(unsigned char);
 		unsigned char getAxisControlTap();
 		void setAxisControlTap(unsigned char);
 		unsigned char getTapSource();
-		unsigned char getDataRatePwrModeCtrl();
-		void setDataRatePwrModeCtrl(unsigned char);
+		PwrDataRate getDataRate();
+		void setDataRate(PwrDataRate);
 		unsigned char getPowerCtrl();
 		void setPowerCtrl(unsigned char);
 		unsigned char getInterruptEnable();
@@ -111,8 +216,8 @@ namespace ADX
 		unsigned char getInterruptMapCtrl();
 		void setInterruptMapCtrl(unsigned char);
 		unsigned char getInterruptSource();
-		unsigned char getDataFormat();
-		void setDataFormat(unsigned char);
+		DataFormat getDataFormat();
+		void setDataFormat(DataFormat);
 		int16_t getDataX();
 		int16_t getDataY();
 		int16_t getDataZ();
@@ -121,6 +226,9 @@ namespace ADX
 		void setFIFOCtrl(unsigned char);
 		unsigned char getFIFOStatus();
 		void setFIFOStatus(unsigned char);
+		bool startSelfTest();
+
+
 
 
 

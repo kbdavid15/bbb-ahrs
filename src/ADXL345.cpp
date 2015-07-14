@@ -18,17 +18,24 @@ namespace ADX
 	ADXL345::~ADXL345() {
 		spi.close();
 	}
+
+	unsigned char ADXL345::readByte(unsigned char address) {
+		uint8_t wbuf[2] = { address | 0x80, 0x00 };
+		uint8_t rbuf[2];
+		spi.transfer(wbuf, rbuf, sizeof(rbuf));
+		return rbuf[1];
+	}
+	void ADXL345::writeByte(unsigned char address, unsigned char data) {
+		uint8_t wbuf[2] = { address, data };
+		uint8_t rbuf[2];
+		spi.transfer(wbuf, rbuf, sizeof(wbuf));
+	}
+
 	unsigned char ADXL345::getDeviceID() {
-		uint8_t sendBytes[2] = { DEVICE_ID | 0x80, 0x00 };
-		uint8_t recBytes[2];
-		spi.transfer(sendBytes, recBytes, 2);
-		return recBytes[1];
+		return readByte(DEVICE_ID);
 	}
 	unsigned char ADXL345::getThresholdTap() {
-		uint8_t sendBytes[2] = { THRESH_TAP | 0x80, 0x00 };
-		uint8_t recBytes[2];
-		spi.transfer(sendBytes, recBytes, 2);
-		return recBytes[1];
+		return readByte(THRESH_TAP);
 	}
 	Data  ADXL345::getXYZ() {
 		uint8_t sendBytes[7] = { DATAX0 | 0xC0, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02 };
@@ -41,22 +48,31 @@ namespace ADX
 		return data;
 
 	}
-	void ADXL345::setDataFormat(unsigned char format) {
-		// value of 0x0B sets full resolution mode and range to +/- 16g
-		uint8_t sendBytes[2] = { DATA_FORMAT, format };
-		uint8_t recvBytes[2];
-		spi.transfer(sendBytes, recvBytes, sizeof(sendBytes));
+	void ADXL345::setDataFormat(DataFormat format) {
+		writeByte(DATA_FORMAT, format.getData());
+	}
+	DataFormat ADXL345::getDataFormat() {
+		uint8_t regData = readByte(DATA_FORMAT);
+		return DataFormat(regData);
 	}
 	void ADXL345::setPowerCtrl(unsigned char pwr) {
-		// value of 0x08 enables measurement mode
-		uint8_t sendBytes[2] = { POWER_CTL, pwr };
-		uint8_t recvBytes[2];
-		spi.transfer(sendBytes, recvBytes, sizeof(sendBytes));
+		writeByte(POWER_CTL, pwr);
 	}
 	void ADXL345::setInterruptEnable(unsigned char interrupt) {
-		// value of 0x80 enables DataReady bit
-		uint8_t sendBytes[2] = { INT_ENABLE, interrupt };
-		uint8_t recvBytes[2];
-		spi.transfer(sendBytes, recvBytes, sizeof(sendBytes));
+		writeByte(INT_ENABLE, interrupt);
+	}
+	PwrDataRate ADXL345::getDataRate() {
+		uint8_t regVal = readByte(BW_RATE);
+		PwrDataRate pdr(regVal);
+		return pdr;
+	}
+	void ADXL345::setDataRate(PwrDataRate pdr) {
+		writeByte(BW_RATE, pdr.getByteFormat());
+	}
+	bool ADXL345::startSelfTest() {
+		DataFormat data;
+		data.fullRes = 1;
+		data.range = DataRange16g;
+		data.selfTest = 1;
 	}
 }

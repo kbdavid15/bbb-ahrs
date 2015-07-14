@@ -45,9 +45,12 @@
 
 #define GAIN_BIT_OFFSET		5		// shift gain value left 5 bits for register value
 
+#define PI 					3.14159265
+
 #include "../include/myi2c.h"
 #include <string>
 #include <sstream>
+#include <math.h>
 
 namespace HMC {
 	// Config Register A Bitmasks
@@ -193,15 +196,51 @@ namespace HMC {
 		int16_t X_STP, Y_STP, Z_STP;
 	};
 	struct Data {
-		int16_t x;
-		int16_t y;
-		int16_t z;
+		int16_t x, y, z;
+		double fx, fy, fz;	// format (gauss)
+
+		Data(int16_t x, int16_t y, int16_t z, uint16_t factor) {
+			this->x = x;
+			this->y = y;
+			this->z = z;
+			calculateGauss(factor);
+		}
+
 		std::string toString() {
 			std::stringstream ss;
 			ss << "X: " << x << "\t";
 			ss << "Y: " << y << "\t";
 			ss << "Z: " << z;
 			return ss.str();
+		}
+		std::string toString(bool optionRaw) {
+			if (optionRaw) {
+				return this->toString();
+			} else {
+				std::stringstream ss;
+				ss << "X: " << fx << "\t";
+				ss << "Y: " << fy << "\t";
+				ss << "Z: " << fz;
+				return ss.str();
+			}
+		}
+		double getHeadingDeg() {
+			double deg = 0;
+			if (y > 0) {
+				deg =  90 - ((atan((double)x/y))*180/PI);
+			} else if (y < 0) {
+				deg =  270 - ((atan((double)x/y))*180/PI);
+			} else if (y == 0 && x < 0) {
+				deg = 180.0;
+			} else if (y == 0 && x > 0) {
+				deg = 0.0;
+			}
+			return deg;
+		}
+		void calculateGauss(uint16_t factor) {
+			fx = x / (double) factor;
+			fy = y / (double) factor;
+			fz = z / (double) factor;
 		}
 	};
 	struct Status {
