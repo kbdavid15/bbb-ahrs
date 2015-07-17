@@ -14,6 +14,7 @@
 #include "../include/myi2c.h"
 //#includ e "../include/regaddr.h"
 #include "../include/BlackLib/BlackSPI/BlackSPI.h"
+#include "../include/BlackLib/BlackGPIO/BlackGPIO.h"
 #include "../include/HMC5883L.h"
 #include "../include/ADXL345.h"
 #include "../include/L3G4200D.h"
@@ -31,19 +32,19 @@ void timer_handler(int signum) {
 
 int main() {
 
-	struct sigaction sa;
-	struct itimerval timer;
-	memset ( &sa, 0, sizeof ( sa ) );
-
-	sa.sa_handler = &timer_handler;
-	sigaction ( SIGALRM, &sa, NULL );
-
-	timer.it_value.tv_sec = 0;
-	timer.it_value.tv_usec = 100000;
-	timer.it_interval.tv_sec = 0;
-	timer.it_interval.tv_usec = 100000;
-
-	setitimer ( ITIMER_REAL, &timer, NULL );
+//	struct sigaction sa;
+//	struct itimerval timer;
+//	memset ( &sa, 0, sizeof ( sa ) );
+//
+//	sa.sa_handler = &timer_handler;
+//	sigaction ( SIGALRM, &sa, NULL );
+//
+//	timer.it_value.tv_sec = 0;
+//	timer.it_value.tv_usec = 100000;
+//	timer.it_interval.tv_sec = 0;
+//	timer.it_interval.tv_usec = 100000;
+//
+//	setitimer ( ITIMER_REAL, &timer, NULL );
 
 	// create device objects and initialize
 	HMC::HMC5883L hmc;
@@ -56,32 +57,53 @@ int main() {
 	ADX::ADXL345 adx;
 	ADX::DataFormat format;
 	format.fullRes = 1;
+	format.range = ADX::DataRange2g;
 	adx.setDataFormat(format);	// value of 0x0B sets full resolution mode and range to +/- 16g
 	adx.setPowerCtrl(0x08);		// value of 0x08 enables measurement mode
+	//adx.setInterruptEnable(0x00);	// disables interrupts
 	adx.setInterruptEnable(0x80);	// value of 0x80 enables DataReady bit
+	ADX::PwrDataRate odr(false, ADX::ODR_6_25); // set data rate to 200Hz
+	adx.setDataRate(odr);
 
-	printf("ADX Device ID: 0x%X\n",adx.getDeviceID());
+//	printf("ADX Device ID: 0x%X\n",adx.getDeviceID());
+
+	// set up GPIO interrupt
+	BlackLib::BlackGPIO adxInt1(BlackLib::GPIO_60, BlackLib::input, BlackLib::SecureMode);
+
 
 	// main program loop
 	while (true)
 	{
-		if (updateDataFlag)
-		{
-//			if (hmc.getStatus().DataReady)
-//			{
-//				HMC::Data data = hmc.getDataXYZ();
-//				cout << data.toString(false) << endl;
-//				printf("Heading (deg): %f\n", data.getHeadingDeg());
-//			}
-//			else {
-//				cout << "Data not ready" << endl;
-//			}
+
+		if (adxInt1.isHigh()) {
+			// check interrupt source
 
 			ADX::Data d = adx.getXYZ();
+			d.convertToG(format);
 			cout << d.toString() << endl;
+			cout << d.toString(false) << endl;
 
-			updateDataFlag = false;
 		}
+
+
+
+//		if (updateDataFlag)
+//		{
+////			if (hmc.getStatus().DataReady)
+////			{
+////				HMC::Data data = hmc.getDataXYZ();
+////				cout << data.toString(false) << endl;
+////				printf("Heading (deg): %f\n", data.getHeadingDeg());
+////			}
+////			else {
+////				cout << "Data not ready" << endl;
+////			}
+//
+//			ADX::Data d = adx.getXYZ();
+//			cout << d.toString() << endl;
+//
+//			updateDataFlag = false;
+//		}
 	}
 
 //	printf("L3G4200D ID (0x0F): %x\n", l3g.getDeviceID());

@@ -43,6 +43,10 @@
 #define FIFO_CTL		0x38
 #define FIFO_STATUS		0x39
 
+#define BYTE_READ		0x80
+#define MULTI_BYTE_READ 0xC0
+#define BYTE_WRITE		0x00
+
 #define SELF_TEST_MIN_X_16	6
 #define SELF_TEST_MAX_X_16	67
 #define SELF_TEST_MIN_Y_16	-67
@@ -56,19 +60,12 @@
 
 namespace ADX
 {
-	struct Data {
-		int16_t x;
-		int16_t y;
-		int16_t z;
 
-		std::string toString() {
-			std::stringstream ss;
-			ss << "X: " << x << "\t";
-			ss << "Y: " << y << "\t";
-			ss << "Z: " << z;
-			return ss.str();
-		}
+
+	struct AvgData {
+		double x, y, z;
 	};
+
 /*	+----------+---------+-----------+
 	| ODR (Hz) | BW (Hz) | Rate Code |
 	+----------+---------+-----------+
@@ -134,12 +131,17 @@ namespace ADX
 		DataRange16g
 	};
 
-
 /*	+-----------+-----+------------+----+----------+---------+----+----+
 	| D7        | D6  | D5         | D4 | D3       | D2      | D1 | D0 |
 	+-----------+-----+------------+----+----------+---------+----+----+
 	| SELF_TEST | SPI | INT_INVERT | 0  | FULL_RES | Justify | Range   |
-	+-----------+-----+------------+----+----------+---------+---------+	*/
+	+-----------+-----+------------+----+----------+---------+---------+
+	FULL_RES: When this bit is set to a value of 1, the device is in full resolution
+	mode, where the output resolution increases with the g range
+	set by the range bits to maintain a 4 mg/LSB scale factor. When
+	the FULL_RES bit is set to 0, the device is in 10-bit mode, and
+	the range bits determine the maximum g range and scale factor.
+*/
 	struct DataFormat {
 		uint8_t selfTest = 0;
 		uint8_t spiMode  = 0;
@@ -165,12 +167,103 @@ namespace ADX
 		}
 	};
 
+	struct Data {
+		int16_t x, y, z;
+		double 	xg, yg, zg;
+		bool 	fullResMode;
+
+//		Data(x, y, z) {
+//			this->x = x;
+//			this->y = y;
+//			this->z = z;
+//		}
+//		void setX(int16_t x) {
+//			this->x = x;
+//
+//		}
+		std::string toString() {
+			std::stringstream ss;
+			ss << "X: " << x << "\t";
+			ss << "Y: " << y << "\t";
+			ss << "Z: " << z;
+			return ss.str();
+		}
+		std::string toString(bool rawData) {
+			std::stringstream ss;
+			if (rawData) {
+				ss << "X: " << x << "\t";
+				ss << "Y: " << y << "\t";
+				ss << "Z: " << z;
+			} else {
+				ss << "Xg: " << xg << "\t";
+				ss << "Yg: " << yg << "\t";
+				ss << "Zg: " << zg;
+			}
+
+			return ss.str();
+		}
+
+		//Convert the accelerometer value to G's.
+		//With 10 bits measuring over a +/-4g range we can find how to convert by using the equation:
+		//Gs = Measurement Value * (G-range/(2^10)) or Gs = Measurement Value * (8/1024)
+		void convertToG(bool fullResMode, DataRange range) {
+			double scaleFactor;
+			if (fullResMode) {
+				scaleFactor = 4.0;
+			} else {
+				switch (range) {
+				case DataRange2g:
+					scaleFactor = 4.0/1024;
+					break;
+				case DataRange4g:
+					scaleFactor = 8.0/1024;
+					break;
+				case DataRange8g:
+					scaleFactor = 16.0/1024;
+					break;
+				case DataRange16g:
+					scaleFactor = 32.0/1024;
+					break;
+				}
+			}
+			xg = x * scaleFactor;
+			yg = y * scaleFactor;
+			zg = z * scaleFactor;
+		}
+		void convertToG(DataFormat format) {
+			double scaleFactor;
+			if (format.fullRes) {
+				scaleFactor = 4.0/1000;
+			} else {
+				switch (format.range) {
+				case DataRange2g:
+					scaleFactor = 4.0/1024;
+					break;
+				case DataRange4g:
+					scaleFactor = 8.0/1024;
+					break;
+				case DataRange8g:
+					scaleFactor = 16.0/1024;
+					break;
+				case DataRange16g:
+					scaleFactor = 32.0/1024;
+					break;
+				}
+			}
+			xg = x * scaleFactor;
+			yg = y * scaleFactor;
+			zg = z * scaleFactor;
+		}
+
+	};
+
 	class ADXL345
 	{
 	private:
 
 		BlackLib::BlackSPI spi;
 		unsigned char readByte(unsigned char REG_ADDR);
+		unsigned char * readBytes(uint8_t REG_ADDR, uint8_t len);
 		void writeByte(unsigned char REG_ADDR, unsigned char data);
 
 	public:
@@ -227,33 +320,8 @@ namespace ADX
 		unsigned char getFIFOStatus();
 		void setFIFOStatus(unsigned char);
 		bool startSelfTest();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		void calibrateOffset();
+		AvgData averageDataPoints(uint8_t numPoints);
 
 
 	};

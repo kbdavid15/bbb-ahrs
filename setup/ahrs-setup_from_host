@@ -1,0 +1,13 @@
+#! /bin/bash
+
+scp BBB-AHRS-00A0.dts root@192.168.7.2:/tmp
+
+ssh root@192.168.7.2 '
+cd /tmp
+
+dtc -O dtb -o BBB-AHRS-00A0.dtbo -b 0 -@ BBB-AHRS-00A0.dts
+
+cp -r BBB-AHRS-00A0.dtbo /lib/firmware
+
+rm -rf BBB-AHRS*
+'

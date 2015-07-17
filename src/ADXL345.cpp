@@ -7,6 +7,7 @@
 
 #include "../include/ADXL345.h"
 #include <iostream>
+#include <unistd.h>
 
 using namespace std;
 
@@ -19,11 +20,18 @@ namespace ADX
 		spi.close();
 	}
 
-	unsigned char ADXL345::readByte(unsigned char address) {
-		uint8_t wbuf[2] = { address | 0x80, 0x00 };
+	unsigned char ADXL345::readByte(uint8_t address) {
+		uint8_t wbuf[2] = { address | BYTE_READ, 0x00 };
 		uint8_t rbuf[2];
 		spi.transfer(wbuf, rbuf, sizeof(rbuf));
 		return rbuf[1];
+	}
+	unsigned char * ADXL345::readBytes(uint8_t address, uint8_t len) {
+		uint8_t wbuf[len];
+		wbuf[0] = { address | MULTI_BYTE_READ };
+		uint8_t rbuf[len];
+		spi.transfer(wbuf, rbuf, len);
+		return rbuf;
 	}
 	void ADXL345::writeByte(unsigned char address, unsigned char data) {
 		uint8_t wbuf[2] = { address, data };
@@ -38,9 +46,7 @@ namespace ADX
 		return readByte(THRESH_TAP);
 	}
 	Data  ADXL345::getXYZ() {
-		uint8_t sendBytes[7] = { DATAX0 | 0xC0, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02 };
-		uint8_t recvBytes[7];
-		spi.transfer(sendBytes, recvBytes, sizeof(recvBytes));
+		uint8_t *recvBytes = readBytes(DATAX0, 7);
 		Data data;
 		data.x = ((recvBytes[2] << 8) + recvBytes[1]);
 		data.y = ((recvBytes[4] << 8) + recvBytes[3]);
@@ -74,5 +80,20 @@ namespace ADX
 		data.fullRes = 1;
 		data.range = DataRange16g;
 		data.selfTest = 1;
+	}
+	void ADXL345::calibrateOffset() {
+
+	}
+	AvgData ADXL345::averageDataPoints(uint8_t numPoints) {
+		long total_x = 0, total_y = 0, total_z = 0;
+		for (uint8_t i = 0; i < numPoints; i++) {
+			Data d = getXYZ();
+			total_x += d.x;
+			total_y += d.y;
+			total_z += d.z;
+
+
+		}
+
 	}
 }
