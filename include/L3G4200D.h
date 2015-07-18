@@ -41,7 +41,7 @@
 
 #define BYTE_READ		0x80
 #define BYTE_WRITE		0x00
-#define MULTI_BYTE		0x40
+#define MULTI_BYTE_READ		0x40
 
 #define DPS_CONV_250	0.00875
 #define DPS_CONV_500	0.0175

@@ -44,8 +44,12 @@
 #define FIFO_STATUS		0x39
 
 #define BYTE_READ		0x80
-#define MULTI_BYTE_READ 0xC0
+#define MULTI_BYTE	 	0x40
+#define MULTI_BYTE_READ	(BYTE_READ | MULTI_BYTE)	// 0xC0
 #define BYTE_WRITE		0x00
+
+
+#define DATA_RATE_OFFSET	6
 
 #define SELF_TEST_MIN_X_16	6
 #define SELF_TEST_MAX_X_16	67
@@ -62,24 +66,22 @@ namespace ADX
 {
 
 
-	struct AvgData {
-		double x, y, z;
-	};
 
-/*	+----------+---------+-----------+
-	| ODR (Hz) | BW (Hz) | Rate Code |
-	+----------+---------+-----------+
-	| 3200     | 1600    |      1111 |
-	| 1600     | 800     |      1110 |
-	| 800      | 400     |      1101 |
-	| 400      | 200     |      1100 |
-	| 200      | 100     |      1011 |
-	| 100      | 50      |      1010 |
-	| 50       | 25      |      1001 |
-	| 25       | 12.5    |      1000 |
-	| 12.5     | 6.25    |      0111 |
-	| 6.25     | 3.125   |      0110 |
-	+----------+---------+-----------+	*/
+
+/*	+----------+---------+------------+
+	| ODR (Hz) | BW (Hz) | Rate Code  |
+	+----------+---------+------------+
+	| 3200     | 1600    |  15   1111 |
+	| 1600     | 800     |  14   1110 |
+	| 800      | 400     |  13   1101 |
+	| 400      | 200     |  12   1100 |
+	| 200      | 100     |  11   1011 |
+	| 100      | 50      |  10   1010 |
+	| 50       | 25      |   9   1001 |
+	| 25       | 12.5    |   8   1000 |
+	| 12.5     | 6.25    |   7   0111 |
+	| 6.25     | 3.125   |   6   0110 |
+	+----------+---------+------------+	*/
 	enum DataRate : uint8_t {
 		ODR_3200 	= 0b1111,
 		ODR_1600 	= 0b1110,
@@ -138,7 +140,7 @@ namespace ADX
 	+-----------+-----+------------+----+----------+---------+---------+
 	FULL_RES: When this bit is set to a value of 1, the device is in full resolution
 	mode, where the output resolution increases with the g range
-	set by the range bits to maintain a 4 mg/LSB scale factor. When
+	set by the range bits to maintain a 3.9 mg/LSB scale factor. When
 	the FULL_RES bit is set to 0, the device is in 10-bit mode, and
 	the range bits determine the maximum g range and scale factor.
 */
@@ -151,6 +153,14 @@ namespace ADX
 		DataRange range	 = DataRange2g;
 
 		DataFormat() { }
+		DataFormat(bool useFullRes, DataRange range, uint8_t selfTest = 0, uint8_t spiMode = 0, uint8_t intInvert = 0, uint8_t justify = 0) {
+			// assume all other inputs are 0
+			this->selfTest = selfTest;
+			this->spiMode = spiMode;
+			this->intInvert = intInvert;
+			this->fullRes = (useFullRes ? 1 : 0);
+			this->range = range;
+		}
 		DataFormat(uint8_t data) {
 			selfTest = (data & 0x80) >> 7;
 			spiMode  = (data & 0x40) >> 6;
@@ -159,11 +169,10 @@ namespace ADX
 			justify  = (data & 0x04) >> 2;
 			range 	 = (DataRange)(data & 0x03);
 		}
-
 		uint8_t getData() {
 			return ((selfTest << 7)  | (spiMode << 6) |
 					(intInvert << 5) | (fullRes << 3) |
-					(justify << 2)   | (range << 1));
+					(justify << 2)   | range);
 		}
 	};
 
@@ -188,6 +197,19 @@ namespace ADX
 			ss << "Z: " << z;
 			return ss.str();
 		}
+		std::string toString(bool raw, char formatSpecifier) {
+			std::stringstream ss;
+			if (raw) {
+				ss << x << formatSpecifier;
+				ss << y << formatSpecifier;
+				ss << z;
+			} else {
+				ss << xg << formatSpecifier;
+				ss << yg << formatSpecifier;
+				ss << zg;
+			}
+			return ss.str();
+		}
 		std::string toString(bool rawData) {
 			std::stringstream ss;
 			if (rawData) {
@@ -209,7 +231,7 @@ namespace ADX
 		void convertToG(bool fullResMode, DataRange range) {
 			double scaleFactor;
 			if (fullResMode) {
-				scaleFactor = 4.0;
+				scaleFactor = 3.9/1000;
 			} else {
 				switch (range) {
 				case DataRange2g:
@@ -233,7 +255,7 @@ namespace ADX
 		void convertToG(DataFormat format) {
 			double scaleFactor;
 			if (format.fullRes) {
-				scaleFactor = 4.0/1000;
+				scaleFactor = 3.9/1000;
 			} else {
 				switch (format.range) {
 				case DataRange2g:
@@ -257,6 +279,29 @@ namespace ADX
 
 	};
 
+	struct AvgData {
+		double x, y, z;
+		std::string toString() {
+			std::stringstream ss;
+			ss << "X: " << x << "\t";
+			ss << "Y: " << y << "\t";
+			ss << "Z: " << z;
+			return ss.str();
+		}
+		AvgData& operator -(const AvgData& a)  {
+			AvgData newData;
+			newData.x = x - a.x;
+			newData.y = y - a.y;
+			newData.z = z - a.z;
+			return newData;
+		}
+	};
+
+	enum PwrMode : unsigned char {
+		MeasureOff = 0,
+		MeasureOn  = 0x08
+	};
+
 	class ADXL345
 	{
 	private:
@@ -265,6 +310,10 @@ namespace ADX
 		unsigned char readByte(unsigned char REG_ADDR);
 		unsigned char * readBytes(uint8_t REG_ADDR, uint8_t len);
 		void writeByte(unsigned char REG_ADDR, unsigned char data);
+		void writeBytes(unsigned char REG_ADDR, unsigned char *data, unsigned char len);
+		// output data rate in Hz
+		double dataRate;
+		const static double DATA_RATE_VAL[];
 
 	public:
 		ADXL345();
@@ -273,6 +322,8 @@ namespace ADX
 		unsigned char getDeviceID();
 		unsigned char getThresholdTap();
 		void setThresholdTap(unsigned char thresh);
+		void setAxisOffset(unsigned char *offset);
+		void resetOffset();
 		unsigned char getAxisOffsetX();
 		void setAxisOffsetX(unsigned char offset);
 		unsigned char getAxisOffsetY();
@@ -303,6 +354,15 @@ namespace ADX
 		PwrDataRate getDataRate();
 		void setDataRate(PwrDataRate);
 		unsigned char getPowerCtrl();
+		/**
+		 *  +----+----+------+------------+---------+-------+--------+----+
+			| D7 | D6 |  D5  |     D4     |   D3    |  D2   |   D1   | D0 |
+			+----+----+------+------------+---------+-------+--------+----+
+			|  0 |  0 | Link | AUTO_SLEEP | Measure | Sleep |    Wakeup   |
+			+----+----+------+------------+---------+-------+--------+----+
+		 *
+		 * @param
+		 */
 		void setPowerCtrl(unsigned char);
 		unsigned char getInterruptEnable();
 		void setInterruptEnable(unsigned char);
@@ -322,8 +382,10 @@ namespace ADX
 		bool startSelfTest();
 		void calibrateOffset();
 		AvgData averageDataPoints(uint8_t numPoints);
-
-
+		struct timespec getInitWaitTime();
+		long getWaitTime(bool);
+		void waitInitTime();
+		void waitTime(bool);
 	};
 
 }

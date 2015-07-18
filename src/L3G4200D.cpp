@@ -48,7 +48,7 @@ namespace L3G {
 		return recBytes[1];
 	}
 	Data L3G4200D::getXYZ() {
-		uint8_t sendBytes[7] = { OUT_X_L | BYTE_READ | MULTI_BYTE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+		uint8_t sendBytes[7] = { OUT_X_L | BYTE_READ | MULTI_BYTE_READ, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 		uint8_t recvBytes[7];
 		spi.transfer(sendBytes, recvBytes, sizeof(sendBytes));
 		Data data;

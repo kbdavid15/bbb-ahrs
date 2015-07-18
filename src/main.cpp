@@ -7,6 +7,7 @@
 //============================================================================
 
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <stddef.h>
 #include <unistd.h>
@@ -47,43 +48,56 @@ int main() {
 //	setitimer ( ITIMER_REAL, &timer, NULL );
 
 	// create device objects and initialize
-	HMC::HMC5883L hmc;
-	hmc.setModeRegister(HMC::ContinuousMeasurement);
-	hmc.setConfigRegA(HMC::DATA_RATE_75 | HMC::MEAS_MODE_NORM);
-	hmc.setConfigRegB(HMC::GAIN_0);
-
-	L3G::L3G4200D l3g(L3G::dps_500);
-
-	ADX::ADXL345 adx;
-	ADX::DataFormat format;
-	format.fullRes = 1;
-	format.range = ADX::DataRange2g;
-	adx.setDataFormat(format);	// value of 0x0B sets full resolution mode and range to +/- 16g
-	adx.setPowerCtrl(0x08);		// value of 0x08 enables measurement mode
-	//adx.setInterruptEnable(0x00);	// disables interrupts
-	adx.setInterruptEnable(0x80);	// value of 0x80 enables DataReady bit
-	ADX::PwrDataRate odr(false, ADX::ODR_6_25); // set data rate to 200Hz
-	adx.setDataRate(odr);
-
-//	printf("ADX Device ID: 0x%X\n",adx.getDeviceID());
+//	HMC::HMC5883L hmc;
+//	hmc.setModeRegister(HMC::ContinuousMeasurement);
+//	hmc.setConfigRegA(HMC::DATA_RATE_75 | HMC::MEAS_MODE_NORM);
+//	hmc.setConfigRegB(HMC::GAIN_0);
+//
+//	L3G::L3G4200D l3g(L3G::dps_500);
 
 	// set up GPIO interrupt
 	BlackLib::BlackGPIO adxInt1(BlackLib::GPIO_60, BlackLib::input, BlackLib::SecureMode);
 
+	ADX::ADXL345 adx;
+	//adx.startSelfTest();
+	adx.resetOffset();
+//	adx.calibrateOffset();
+
+	ADX::DataFormat format;
+	format.fullRes = 1;
+	format.range = ADX::DataRange16g;
+	format.justify = 0;
+	adx.setDataFormat(format);	// value of 0x0B sets full resolution mode and range to +/- 16g
+	adx.setPowerCtrl(0x08);		// value of 0x08 enables measurement mode
+	//adx.setInterruptEnable(0x00);	// disables interrupts
+	adx.setInterruptEnable(0x80);	// value of 0x80 enables DataReady bit
+	ADX::PwrDataRate odr(false, ADX::ODR_1600); // set data rate to 100Hz
+	adx.setDataRate(odr);
+
+	// wait 1.1ms + 1/ODR
+	struct timespec waitTime = adx.getInitWaitTime();
+	nanosleep(&waitTime, NULL);
+
+	ofstream mFile;
+	mFile.open("acceldata.csv", ios::out);
+	mFile << "X,Y,Z" << endl;
+
+	long counter = 0;
 
 	// main program loop
 	while (true)
 	{
-
 		if (adxInt1.isHigh()) {
 			// check interrupt source
 
 			ADX::Data d = adx.getXYZ();
 			d.convertToG(format);
-			cout << d.toString() << endl;
-			cout << d.toString(false) << endl;
-
+			cout << counter << ": " << d.toString() << endl;
+			mFile << d.toString(false, ',') << endl;
+			//cout << d.toString(false) << endl;
+			counter++;
 		}
+		if (counter > 10000) break;
 
 
 
@@ -122,5 +136,6 @@ int main() {
 //		cout << d.toString() << endl;
 //		usleep(100 * 1000);
 //	}
+	mFile.close();
 	return 0;
 }
