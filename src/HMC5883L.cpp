@@ -35,6 +35,8 @@ namespace HMC {
 		cout << "HMC obj deleted" << endl;
 	}
 
+
+
 	string HMC5883L::getDeviceID() {
 		device->readBytes(HMC_ID_REG_A, 3);
 		stringstream ss;

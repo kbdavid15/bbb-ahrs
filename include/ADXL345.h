@@ -288,7 +288,13 @@ namespace ADX
 			ss << "Z: " << z;
 			return ss.str();
 		}
-		AvgData& operator -(const AvgData& a)  {
+		/**
+		 * Overloads the minus (-) operator to define subtraction
+		 * of one instance of this object from another
+		 * @param a: Subtrahend
+		 * @return	The difference of this instance (minuend) and "a"
+		 */
+		AvgData operator -(const AvgData& a)  {
 			AvgData newData;
 			newData.x = x - a.x;
 			newData.y = y - a.y;
@@ -308,7 +314,7 @@ namespace ADX
 
 		BlackLib::BlackSPI spi;
 		unsigned char readByte(unsigned char REG_ADDR);
-		unsigned char * readBytes(uint8_t REG_ADDR, uint8_t len);
+		void readBytes(uint8_t REG_ADDR, uint8_t* readData, uint8_t len);
 		void writeByte(unsigned char REG_ADDR, unsigned char data);
 		void writeBytes(unsigned char REG_ADDR, unsigned char *data, unsigned char len);
 		// output data rate in Hz

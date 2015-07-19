@@ -33,19 +33,19 @@ void timer_handler(int signum) {
 
 int main() {
 
-//	struct sigaction sa;
-//	struct itimerval timer;
-//	memset ( &sa, 0, sizeof ( sa ) );
-//
-//	sa.sa_handler = &timer_handler;
-//	sigaction ( SIGALRM, &sa, NULL );
-//
-//	timer.it_value.tv_sec = 0;
-//	timer.it_value.tv_usec = 100000;
-//	timer.it_interval.tv_sec = 0;
-//	timer.it_interval.tv_usec = 100000;
-//
-//	setitimer ( ITIMER_REAL, &timer, NULL );
+	struct sigaction sa;
+	struct itimerval timer;
+	memset ( &sa, 0, sizeof ( sa ) );
+
+	sa.sa_handler = &timer_handler;
+	sigaction ( SIGALRM, &sa, NULL );
+
+	timer.it_value.tv_sec = 0;
+	timer.it_value.tv_usec = 10000;
+	timer.it_interval.tv_sec = 0;
+	timer.it_interval.tv_usec = 10000;
+
+	setitimer ( ITIMER_REAL, &timer, NULL );
 
 	// create device objects and initialize
 //	HMC::HMC5883L hmc;
@@ -53,13 +53,13 @@ int main() {
 //	hmc.setConfigRegA(HMC::DATA_RATE_75 | HMC::MEAS_MODE_NORM);
 //	hmc.setConfigRegB(HMC::GAIN_0);
 //
-//	L3G::L3G4200D l3g(L3G::dps_500);
+	L3G::L3G4200D l3g(L3G::dps_500);
 
 	// set up GPIO interrupt
-	BlackLib::BlackGPIO adxInt1(BlackLib::GPIO_60, BlackLib::input, BlackLib::SecureMode);
+//	BlackLib::BlackGPIO adxInt1(BlackLib::GPIO_60, BlackLib::input, BlackLib::SecureMode);
 
 	ADX::ADXL345 adx;
-	//adx.startSelfTest();
+	adx.startSelfTest();
 	//adx.resetOffset();
 	adx.calibrateOffset();
 
@@ -80,44 +80,41 @@ int main() {
 
 	ofstream mFile;
 	mFile.open("acceldata.csv", ios::out);
-	mFile << "X,Y,Z" << endl;
+	mFile << "AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ" << endl;
 
 	long counter = 0;
 
 	// main program loop
 	while (true)
 	{
-		if (adxInt1.isHigh()) {
-			// check interrupt source
+		if (updateDataFlag)
+		{
+//			if (hmc.getStatus().DataReady)
+//			{
+//				HMC::Data data = hmc.getDataXYZ();
+//				cout << data.toString(false) << endl;
+//				printf("Heading (deg): %f\n", data.getHeadingDeg());
+//			}
+//			else {
+//				cout << "Data not ready" << endl;
+//			}
 
 			ADX::Data d = adx.getXYZ();
 			d.convertToG(format);
 			//cout << counter << ": " << d.toString() << endl;
 			mFile << d.toString(false, ',') << endl;
-			cout << d.toString(false) << endl;
+//			cout << d.toString(false) << endl;
+
+
+			L3G::DPS dps = l3g.getDPS();
+			cout << dps.toString() << endl;
+
+
 			counter++;
+
+			updateDataFlag = false;
 		}
-		if (counter > 5000) break;
-
-
-
-//		if (updateDataFlag)
-//		{
-////			if (hmc.getStatus().DataReady)
-////			{
-////				HMC::Data data = hmc.getDataXYZ();
-////				cout << data.toString(false) << endl;
-////				printf("Heading (deg): %f\n", data.getHeadingDeg());
-////			}
-////			else {
-////				cout << "Data not ready" << endl;
-////			}
-//
-//			ADX::Data d = adx.getXYZ();
-//			cout << d.toString() << endl;
-//
-//			updateDataFlag = false;
-//		}
+		if (counter > 500) break;
 	}
 
 //	printf("L3G4200D ID (0x0F): %x\n", l3g.getDeviceID());

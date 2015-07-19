@@ -17,24 +17,28 @@ namespace ADX
 
 	ADXL345::ADXL345():spi(BlackLib::SPI0_0, 8, BlackLib::SpiMode3, 2400000) {
 		spi.open( BlackLib::ReadWrite | BlackLib::NonBlock );
-
+		dataRate = 100;	// default value
 	}
 	ADXL345::~ADXL345() {
 		spi.close();
 	}
 
 	unsigned char ADXL345::readByte(uint8_t address) {
-		uint8_t wbuf[2] = { address | BYTE_READ, 0x00 };
+		uint8_t wbuf[2] = { (uint8_t)(address | BYTE_READ), 0x00 };
 		uint8_t rbuf[2];
 		spi.transfer(wbuf, rbuf, sizeof(rbuf));
 		return rbuf[1];
 	}
-	unsigned char * ADXL345::readBytes(uint8_t address, uint8_t len) {
+	/**	Reads a number of bytes from the sensor
+	 *
+	 * @param address: Register address to start reading from
+	 * @param readData: Return data array pointer
+	 * @param len: Length of bytes to read, +1. This should also be the sizeof readData
+	 */
+	void ADXL345::readBytes(uint8_t address, uint8_t* readData, uint8_t len) {
 		uint8_t wbuf[len];
-		wbuf[0] = { address | MULTI_BYTE_READ };
-		uint8_t rbuf[len];
-		spi.transfer(wbuf, rbuf, len);
-		return rbuf;
+		wbuf[0] = { (uint8_t)(address | MULTI_BYTE_READ) };
+		spi.transfer(wbuf, readData, len);
 	}
 	void ADXL345::writeByte(unsigned char address, unsigned char data) {
 		uint8_t wbuf[2] = { address, data };
@@ -58,7 +62,8 @@ namespace ADX
 		return readByte(THRESH_TAP);
 	}
 	Data  ADXL345::getXYZ() {
-		uint8_t *recvBytes = readBytes(DATAX0, 7);
+		uint8_t recvBytes[7];
+		readBytes(DATAX0, recvBytes, sizeof(recvBytes));
 		Data data;
 		data.x = ((int)(recvBytes[2] << 8) | (int)recvBytes[1]);
 		data.y = ((int)(recvBytes[4] << 8) | (int)recvBytes[3]);
@@ -89,9 +94,8 @@ namespace ADX
 		dataRate = DATA_RATE_VAL[pdr.dataRate - DATA_RATE_OFFSET];
 	}
 	bool ADXL345::startSelfTest() {
-		//setPowerCtrl(MeasureOff);
 		DataFormat data;
-		data.fullRes = 1;
+		data.fullRes = 0;
 		data.range = DataRange16g;
 		data.selfTest = 0;
 		setDataFormat(data);
@@ -103,10 +107,20 @@ namespace ADX
 		setDataFormat(data);
 		waitTime(true);	// waits 11.1 ms for data rate of 100Hz
 		AvgData avgSelfTest = averageDataPoints(100);
-		cout << avgNominal.toString() << endl;
-		cout << avgSelfTest.toString() << endl;
+
 		AvgData diff = avgSelfTest-avgNominal;
 		cout << diff.toString() << endl;
+
+		// compare against self test limits
+		if (diff.x > SELF_TEST_MAX_X_16 || diff.x < SELF_TEST_MIN_X_16 ||
+			diff.y > SELF_TEST_MAX_Y_16 || diff.y < SELF_TEST_MIN_Y_16 ||
+			diff.z > SELF_TEST_MAX_Z_16 || diff.z < SELF_TEST_MIN_Z_16) {
+			cerr << "Self test failed" << endl;
+			return false;
+		} else {
+			cout << "Self test passed" << endl;
+			return true;
+		}
 	}
 	void ADXL345::calibrateOffset() {
 		DataFormat format(true, DataRange2g);
@@ -157,12 +171,12 @@ namespace ADX
 		struct timespec waitTime = { 0, timeL };
 		return waitTime;
 	}
-	void ADXL345::waitInitTime() {
-		double time = 1100000 + (1 / dataRate) * 1000000000;
-		long timeL = (long)(time+0.5);
-		timespec waitTime = { 0, timeL };
-		nanosleep(&waitTime, NULL);
-	}
+//	void ADXL345::waitInitTime() {
+//		double time = 1100000 + (1 / dataRate) * 1000000000;
+//		long timeL = (long)(time+0.5);
+//		timespec waitTime = { 0, timeL };
+//		nanosleep(&waitTime, NULL);
+//	}
 	void ADXL345::waitTime(bool initOffset) {
 		double time = (1 / dataRate) * 1000000000;
 		if (initOffset) {

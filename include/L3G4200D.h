@@ -41,7 +41,7 @@
 
 #define BYTE_READ		0x80
 #define BYTE_WRITE		0x00
-#define MULTI_BYTE_READ		0x40
+#define MULTI_BYTE		0x40
 
 #define DPS_CONV_250	0.00875
 #define DPS_CONV_500	0.0175
@@ -86,7 +86,7 @@ namespace L3G {
 				format = DPS_CONV_500;
 				break;
 			case dps_2000:
-				format = dps_2000;
+				format = DPS_CONV_2000;
 				break;
 			}
 			dpx = d.x * format;
@@ -110,6 +110,11 @@ namespace L3G {
 	private:
 		CR4_MeasureRange _range;
 		unsigned char _block_data_update;	// 0x00 for continuous update, 0x80 for update after data read
+
+		unsigned char readByte(unsigned char REG_ADDR);
+		void readBytes(uint8_t REG_ADDR, uint8_t* readData, uint8_t len);
+		void writeByte(unsigned char REG_ADDR, unsigned char data);
+		void writeBytes(unsigned char REG_ADDR, unsigned char *data, unsigned char len);
 
 	public:
 		L3G4200D();

@@ -41,6 +41,39 @@ namespace L3G {
 	L3G4200D::~L3G4200D() {
 		spi.close();
 	}
+
+	unsigned char L3G4200D::readByte(uint8_t address) {
+		uint8_t wbuf[2] = { (uint8_t)(address | BYTE_READ), 0x00 };
+		uint8_t rbuf[2];
+		spi.transfer(wbuf, rbuf, sizeof(rbuf));
+		return rbuf[1];
+	}
+	/**	Reads a number of bytes from the sensor
+	 *
+	 * @param address: Register address to start reading from
+	 * @param readData: Return data array pointer
+	 * @param len: Length of bytes to read, +1. This should also be the sizeof readData
+	 */
+	void L3G4200D::readBytes(uint8_t address, uint8_t* readData, uint8_t len) {
+		uint8_t wbuf[len];
+		wbuf[0] = { (uint8_t)(address | BYTE_READ | MULTI_BYTE) };
+		spi.transfer(wbuf, readData, len);
+	}
+	void L3G4200D::writeByte(unsigned char address, unsigned char data) {
+		uint8_t wbuf[2] = { address, data };
+		uint8_t rbuf[2];
+		spi.transfer(wbuf, rbuf, sizeof(wbuf));
+	}
+	void L3G4200D::writeBytes(unsigned char address, unsigned char *data, unsigned char len) {
+		uint8_t wbuf[len + 1];
+		wbuf[0] = address | MULTI_BYTE;
+		for (uint8_t i = 1; i < (len + 1); i++) {
+			wbuf[i] = data[i-1];
+		}
+		uint8_t rbuf[len + 1];
+		spi.transfer(wbuf, rbuf, sizeof(wbuf));
+	}
+
 	unsigned char L3G4200D::getDeviceID() {
 		uint8_t sendBytes[2] = { WHO_AM_I | BYTE_READ, 0x00 };
 		uint8_t recBytes[2];
@@ -48,7 +81,7 @@ namespace L3G {
 		return recBytes[1];
 	}
 	Data L3G4200D::getXYZ() {
-		uint8_t sendBytes[7] = { OUT_X_L | BYTE_READ | MULTI_BYTE_READ, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+		uint8_t sendBytes[7] = { OUT_X_L | BYTE_READ | MULTI_BYTE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 		uint8_t recvBytes[7];
 		spi.transfer(sendBytes, recvBytes, sizeof(sendBytes));
 		Data data;
