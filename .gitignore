@@ -58,3 +58,7 @@ Release/
 
 #gedit backup files
 *~
+
+#matlab temp files
+*.asv
+*.csv
