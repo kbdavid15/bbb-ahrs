@@ -45,7 +45,7 @@ namespace ADX
 		uint8_t wbuf[len + 1];
 		wbuf[0] = address | MULTI_BYTE;
 		for (uint8_t i = 1; i < (len + 1); i++) {
-			wbuf[i] = data[i];
+			wbuf[i] = data[i-1];
 		}
 		uint8_t rbuf[len + 1];
 		spi.transfer(wbuf, rbuf, sizeof(wbuf));
@@ -109,7 +109,7 @@ namespace ADX
 		cout << diff.toString() << endl;
 	}
 	void ADXL345::calibrateOffset() {
-		DataFormat format(true, DataRange16g);
+		DataFormat format(true, DataRange2g);
 		setDataFormat(format);
 		setPowerCtrl(MeasureOn);
 		setInterruptEnable(0x80);

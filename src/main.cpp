@@ -60,12 +60,12 @@ int main() {
 
 	ADX::ADXL345 adx;
 	//adx.startSelfTest();
-	adx.resetOffset();
-//	adx.calibrateOffset();
+	//adx.resetOffset();
+	adx.calibrateOffset();
 
 	ADX::DataFormat format;
 	format.fullRes = 1;
-	format.range = ADX::DataRange16g;
+	format.range = ADX::DataRange4g;
 	format.justify = 0;
 	adx.setDataFormat(format);	// value of 0x0B sets full resolution mode and range to +/- 16g
 	adx.setPowerCtrl(0x08);		// value of 0x08 enables measurement mode
@@ -92,12 +92,12 @@ int main() {
 
 			ADX::Data d = adx.getXYZ();
 			d.convertToG(format);
-			cout << counter << ": " << d.toString() << endl;
+			//cout << counter << ": " << d.toString() << endl;
 			mFile << d.toString(false, ',') << endl;
-			//cout << d.toString(false) << endl;
+			cout << d.toString(false) << endl;
 			counter++;
 		}
-		if (counter > 10000) break;
+		if (counter > 5000) break;
 
 
 
