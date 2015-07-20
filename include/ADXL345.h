@@ -61,6 +61,7 @@
 #include "../include/BlackLib/BlackSPI/BlackSPI.h"
 #include <string>
 #include <sstream>
+#include <SensorData.h>
 
 namespace ADX
 {

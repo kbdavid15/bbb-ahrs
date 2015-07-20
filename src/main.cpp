@@ -53,7 +53,8 @@ int main() {
 //	hmc.setConfigRegA(HMC::DATA_RATE_75 | HMC::MEAS_MODE_NORM);
 //	hmc.setConfigRegB(HMC::GAIN_0);
 //
-	L3G::L3G4200D l3g(L3G::dps_500);
+	L3G4200D l3g;
+
 
 	// set up GPIO interrupt
 //	BlackLib::BlackGPIO adxInt1(BlackLib::GPIO_60, BlackLib::input, BlackLib::SecureMode);
@@ -105,10 +106,9 @@ int main() {
 			mFile << d.toString(false, ',') << endl;
 //			cout << d.toString(false) << endl;
 
-
-			L3G::DPS dps = l3g.getDPS();
-			cout << dps.toString() << endl;
-
+			l3g.getXYZ();
+			//DPS dps = l3g.getDPS();
+			cout << l3g.dataToString() << endl;
 
 			counter++;
 

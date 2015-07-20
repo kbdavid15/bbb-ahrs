@@ -47,12 +47,16 @@
 #define DPS_CONV_500	0.0175
 #define DPS_CONV_2000	0.07
 
+#define CR4_SCALE_BITS	4
+#define CR4_STEST_BITS	1
 
 #include "../include/BlackLib/BlackSPI/BlackSPI.h"
 #include <string>
 #include <sstream>
+#include <SpiData.h>
 
-namespace L3G {
+using namespace std;
+using namespace BlackLib;
 
 	const unsigned char CR4_BLOCK_DATA_UPDATE = 0x80;
 
@@ -61,6 +65,60 @@ namespace L3G {
 		dps_500 = 0b00010000,
 		dps_2000= 0b00100000
 	};
+	enum Scale : unsigned char {
+		Scale250 = 0,
+		Scale500,
+		Scale2000
+	};
+	enum Endian : unsigned char {
+		BigEndian, LittleEndian
+	};
+	enum SpiMode : unsigned char {
+		SpiMode4Wire = 0,
+		SpiMode3Wire
+	};
+	enum SelfTest : unsigned char {
+		ST_Disabled = 0,
+		ST_Enabled_Positive = 1,
+		ST_Enabled_Negative = 3
+	};
+
+	struct CR4 {
+		bool 	 blockDataUpdate = false;	// default: Continuous update
+		SelfTest selfTestEnable  = ST_Disabled;
+		Endian 	 ble			 = LittleEndian;	// LSB @ lower addresses
+		Scale 	 scale			 = Scale250;
+		SpiMode  mode			 = SpiMode4Wire;
+
+		CR4() {}
+		CR4(bool blockDataUpdate, SelfTest selfTestEnable, Endian e, Scale scale, SpiMode mode) {
+			this->blockDataUpdate = blockDataUpdate;
+			this->selfTestEnable = selfTestEnable;
+			this->ble = e;
+			this->scale = scale;
+			this->mode = mode;
+		}
+		CR4(uint8_t data) {
+			blockDataUpdate = (data & 0x80) != 0;
+			ble  			= (Endian)((data & 0x40) >> 6);
+			scale			= (Scale)((data & 0x30) >> 4);
+			selfTestEnable  = (SelfTest)((data & 0x06) >> 1);
+			mode			= (SpiMode)(data & 0x01);
+		}
+		uint8_t getData() {
+			return ((blockDataUpdate << 7) | (ble << 6) |
+					(scale << 4) | (selfTestEnable << 1) | mode);
+		}
+		void update(uint8_t data) {
+			blockDataUpdate = (data & 0x80) != 0;
+			ble  			= (Endian)((data & 0x40) >> 6);
+			scale			= (Scale)((data & 0x30) >> 4);
+			selfTestEnable  = (SelfTest)((data & 0x06) >> 1);
+			mode			= (SpiMode)(data & 0x01);
+		}
+	};
+
+
 
 	struct Data {
 		int16_t x, y, z;
@@ -103,33 +161,21 @@ namespace L3G {
 	};
 
 
-	class L3G4200D {
-
-		BlackLib::BlackSPI spi;
+	class L3G4200D : public SpiData {
 
 	private:
-		CR4_MeasureRange _range;
-		unsigned char _block_data_update;	// 0x00 for continuous update, 0x80 for update after data read
-
-		unsigned char readByte(unsigned char REG_ADDR);
-		void readBytes(uint8_t REG_ADDR, uint8_t* readData, uint8_t len);
-		void writeByte(unsigned char REG_ADDR, unsigned char data);
-		void writeBytes(unsigned char REG_ADDR, unsigned char *data, unsigned char len);
-
+		CR4 _ControlReg4;
+		double dataFormatMultiplier;	// updated whenever the scale sensitivity is changed
 	public:
 		L3G4200D();
-		L3G4200D(CR4_MeasureRange);
 		~L3G4200D();
 		unsigned char getDeviceID();
-		Data getXYZ();
-		DPS getDPS();
-		CR4_MeasureRange getMeasurementRange();
-		void setMeasurementRange(CR4_MeasureRange);
+		void getXYZ();
+//		DPS getDPS();
+		CR4 getMeasurementRange();
+		void setControlReg4(CR4);
 		unsigned char getTemperature();
 
-
 	};
-
-}
 
 #endif /* L3G4200D_H_ */
