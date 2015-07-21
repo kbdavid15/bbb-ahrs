@@ -5,15 +5,15 @@
  *      Author: kbdavid15
  */
 
-#include <SensorData.h>
+#include <Sensor.h>
 
 using namespace std;
 
-SensorData::~SensorData() {
+Sensor::~Sensor() {
 	// TODO Auto-generated destructor stub
 }
 
-SensorData::SensorData() {
+Sensor::Sensor() {
 	x = 0;
 	y = 0;
 	z = 0;
@@ -21,7 +21,7 @@ SensorData::SensorData() {
 	yf = 0;
 	zf = 0;
 }
-SensorData::SensorData(int16_t x, int16_t y, int16_t z) {
+Sensor::Sensor(int16_t x, int16_t y, int16_t z) {
 	this->x = x;
 	this->y = y;
 	this->z = z;
@@ -29,21 +29,21 @@ SensorData::SensorData(int16_t x, int16_t y, int16_t z) {
 	yf = 0;
 	zf = 0;
 }
-SensorData::SensorData(int16_t x, int16_t y, int16_t z, double multiplier) {
+Sensor::Sensor(int16_t x, int16_t y, int16_t z, double multiplier) {
 	this->x = x;
 	this->y = y;
 	this->z = z;
 	format(multiplier);
 }
 
-string SensorData::dataToString() {
+string Sensor::dataToString() {
 	std::stringstream ss;
 	ss << "X: " << x << "\t";
 	ss << "Y: " << y << "\t";
 	ss << "Z: " << z;
 	return ss.str();
 }
-string SensorData::dataToFile(bool raw, char formatSpecifier) {
+string Sensor::dataToFile(bool raw, char formatSpecifier) {
 	std::stringstream ss;
 	if (raw) {
 		ss << x << formatSpecifier;
@@ -56,7 +56,7 @@ string SensorData::dataToFile(bool raw, char formatSpecifier) {
 	}
 	return ss.str();
 }
-string SensorData::dataToString(bool rawData) {
+string Sensor::dataToString(bool rawData) {
 	std::stringstream ss;
 	if (rawData) {
 		ss << "X: " << x << "\t";
@@ -69,7 +69,7 @@ string SensorData::dataToString(bool rawData) {
 	}
 	return ss.str();
 }
-void SensorData::format(double multiplier) {
+void Sensor::format(double multiplier) {
 	xf = x * multiplier;
 	yf = y * multiplier;
 	zf = z * multiplier;

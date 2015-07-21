@@ -50,10 +50,11 @@
 #define CR4_SCALE_BITS	4
 #define CR4_STEST_BITS	1
 
-#include "../include/BlackLib/BlackSPI/BlackSPI.h"
+//#include "../include/BlackLib/BlackSPI/BlackSPI.h"
+#include <MySpi.h>
 #include <string>
 #include <sstream>
-#include <SpiData.h>
+#include <Sensor.h>
 
 using namespace std;
 using namespace BlackLib;
@@ -161,9 +162,10 @@ using namespace BlackLib;
 	};
 
 
-	class L3G4200D : public SpiData {
+	class L3G4200D : public Sensor {
 
 	private:
+		MySpi spi;
 		CR4 _ControlReg4;
 		double dataFormatMultiplier;	// updated whenever the scale sensitivity is changed
 	public:
@@ -175,6 +177,7 @@ using namespace BlackLib;
 		CR4 getMeasurementRange();
 		void setControlReg4(CR4);
 		unsigned char getTemperature();
+		virtual void getSensorData();
 
 	};
 

@@ -106,8 +106,7 @@ int main() {
 			mFile << d.toString(false, ',') << endl;
 //			cout << d.toString(false) << endl;
 
-			l3g.getXYZ();
-			//DPS dps = l3g.getDPS();
+			l3g.getSensorData();
 			cout << l3g.dataToString() << endl;
 
 			counter++;
