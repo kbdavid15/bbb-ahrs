@@ -39,18 +39,6 @@
 #define INT1_TSH_ZL 	0x37
 #define INT1_DURATION	0x38
 
-#define BYTE_READ		0x80
-#define BYTE_WRITE		0x00
-#define MULTI_BYTE		0x40
-
-#define DPS_CONV_250	0.00875
-#define DPS_CONV_500	0.0175
-#define DPS_CONV_2000	0.07
-
-#define CR4_SCALE_BITS	4
-#define CR4_STEST_BITS	1
-
-//#include "../include/BlackLib/BlackSPI/BlackSPI.h"
 #include <MySpi.h>
 #include <string>
 #include <sstream>
@@ -59,13 +47,6 @@
 using namespace std;
 using namespace BlackLib;
 
-	const unsigned char CR4_BLOCK_DATA_UPDATE = 0x80;
-
-	enum CR4_MeasureRange : unsigned char {
-		dps_250 = 0,
-		dps_500 = 0b00010000,
-		dps_2000= 0b00100000
-	};
 	enum Scale : unsigned char {
 		Scale250 = 0,
 		Scale500,
@@ -100,11 +81,7 @@ using namespace BlackLib;
 			this->mode = mode;
 		}
 		CR4(uint8_t data) {
-			blockDataUpdate = (data & 0x80) != 0;
-			ble  			= (Endian)((data & 0x40) >> 6);
-			scale			= (Scale)((data & 0x30) >> 4);
-			selfTestEnable  = (SelfTest)((data & 0x06) >> 1);
-			mode			= (SpiMode)(data & 0x01);
+			update(data);
 		}
 		uint8_t getData() {
 			return ((blockDataUpdate << 7) | (ble << 6) |
@@ -119,63 +96,68 @@ using namespace BlackLib;
 		}
 	};
 
+	enum OutputDataRate : unsigned char {
+		ODR_100Hz = 0,
+		ODR_200Hz,
+		ODR_400Hz,
+		ODR_800Hz
+	};
+	/// Cutoff frequency is dependent on the output data rate
+	enum Bandwidth : unsigned char {
+		BW_1 = 0,
+		BW_2,
+		BW_3,
+		BW_4
+	};
+	struct CR1 {
+		OutputDataRate 	rate	  = ODR_100Hz;
+		Bandwidth		bandwidth = BW_1;
+		bool			powerOn	  = false;
+		bool			zEnable   = true;
+		bool			yEnable   = true;
+		bool			xEnable   = true;
 
-
-	struct Data {
-		int16_t x, y, z;
-
-		std::string toString() {
-			std::stringstream ss;
-			ss << "X: " << x << "\t";
-			ss << "Y: " << y << "\t";
-			ss << "Z: " << z;
-			return ss.str();
+		CR1() {}
+		CR1(OutputDataRate rate, Bandwidth bandwidth, bool powerOn, bool zEnable, bool yEnable, bool xEnable) {
+			this->rate = rate;
+			this->bandwidth = bandwidth;
+			this->powerOn = powerOn;
+			this->zEnable = zEnable;
+			this->yEnable = yEnable;
+			this->xEnable = xEnable;
+		}
+		CR1(uint8_t data) {
+			update(data);
+		}
+		uint8_t getData() {
+			return ((rate << 6)    | (bandwidth << 4) | (powerOn << 3) |
+					(zEnable << 2) | (yEnable << 1)   | xEnable);
+		}
+		void update(uint8_t data) {
+			rate = (OutputDataRate)((data & 0xC0) >> 6);
+			bandwidth = (Bandwidth)((data & 0x30) >> 4);
+			powerOn	= ((data & 0x08) >> 3);
+			zEnable = (data & 0x04) >> 2;
+			yEnable	= (data & 0x02) >> 1;
+			xEnable = data & 0x01;
 		}
 	};
-	struct DPS {
-		// holds formatted data
-		double dpx, dpy, dpz;
-		DPS(Data d, CR4_MeasureRange range) {
-			double format = 0;
-			switch (range) {
-			case dps_250:
-				format = DPS_CONV_250;
-				break;
-			case dps_500:
-				format = DPS_CONV_500;
-				break;
-			case dps_2000:
-				format = DPS_CONV_2000;
-				break;
-			}
-			dpx = d.x * format;
-			dpy = d.y * format;
-			dpz = d.z * format;
-		}
-		std::string toString() {
-			std::stringstream ss;
-			ss << "X: " << dpx << "\t";
-			ss << "Y: " << dpy << "\t";
-			ss << "Z: " << dpz;
-			return ss.str();
-		}
-	};
-
 
 	class L3G4200D : public Sensor {
 
 	private:
 		MySpi spi;
+		CR1 _ControlReg1;
 		CR4 _ControlReg4;
-		double dataFormatMultiplier;	// updated whenever the scale sensitivity is changed
+		const static double DPS_CONV_VAL[];
 	public:
 		L3G4200D();
 		~L3G4200D();
 		unsigned char getDeviceID();
-		void getXYZ();
-//		DPS getDPS();
 		CR4 getMeasurementRange();
 		void setControlReg4(CR4);
+		CR1 getControlReg1();
+		void setControlReg1(CR1);
 		unsigned char getTemperature();
 		virtual void getSensorData();
 

@@ -41,9 +41,9 @@ int main() {
 	sigaction ( SIGALRM, &sa, NULL );
 
 	timer.it_value.tv_sec = 0;
-	timer.it_value.tv_usec = 10000;
+	timer.it_value.tv_usec = 5000;
 	timer.it_interval.tv_sec = 0;
-	timer.it_interval.tv_usec = 10000;
+	timer.it_interval.tv_usec = 5000;
 
 	setitimer ( ITIMER_REAL, &timer, NULL );
 
@@ -72,7 +72,7 @@ int main() {
 	adx.setPowerCtrl(0x08);		// value of 0x08 enables measurement mode
 	//adx.setInterruptEnable(0x00);	// disables interrupts
 	adx.setInterruptEnable(0x80);	// value of 0x80 enables DataReady bit
-	ADX::PwrDataRate odr(false, ADX::ODR_1600); // set data rate to 100Hz
+	ADX::PwrDataRate odr(false, ADX::ODR_200); // set data rate to 100Hz
 	adx.setDataRate(odr);
 
 	// wait 1.1ms + 1/ODR
@@ -103,11 +103,12 @@ int main() {
 			ADX::Data d = adx.getXYZ();
 			d.convertToG(format);
 			//cout << counter << ": " << d.toString() << endl;
-			mFile << d.toString(false, ',') << endl;
+			mFile << d.toString(false, ',') << ",";
 //			cout << d.toString(false) << endl;
 
 			l3g.getSensorData();
-			cout << l3g.dataToString() << endl;
+			cout << l3g.dataToString(false) << endl;
+			mFile << l3g.dataToFile(false, ',') << endl;
 
 			counter++;
 

@@ -13,7 +13,7 @@
 
 class Sensor {
 private:
-	double dataFormatMultiplier;	// updated whenever the scale sensitivity is changed
+	double _dataFormatMultiplier;	// updated whenever the scale sensitivity is changed
 public:
 	virtual ~Sensor();
 	Sensor();
@@ -25,7 +25,9 @@ public:
 	std::string dataToString(bool rawData);
 	std::string dataToFile(bool raw, char formatSpecifier);
 	void format(double);
+	void format();
 	virtual void getSensorData()=0;	// defined in implementation class
+	void setFormatMultiplier(double multiplier);
 };
 
 #endif /* SENSOR_H_ */
