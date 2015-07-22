@@ -6,21 +6,16 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <stddef.h>
-#include <unistd.h>
-
-#include "../include/myi2c.h"
-#include "../include/BlackLib/BlackSPI/BlackSPI.h"
-#include "../include/BlackLib/BlackGPIO/BlackGPIO.h"
-#include "../include/HMC5883L.h"
-#include "../include/ADXL345.h"
-#include "../include/L3G4200D.h"
-#include <unistd.h>
+#include <ADXL345.h>
+#include <HMC5883L.h>
+#include <L3G4200D.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <cstring>
+#include <ctime>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -47,10 +42,10 @@ int main() {
 	setitimer ( ITIMER_REAL, &timer, NULL );
 
 	// create device objects and initialize
-	HMC::HMC5883L hmc;
-	hmc.setModeRegister(HMC::ContinuousMeasurement);
-	hmc.setConfigRegA(HMC::DATA_RATE_75 | HMC::MEAS_MODE_NORM);
-	hmc.setConfigRegB(HMC::GAIN_0);
+	HMC5883L hmc;
+	hmc.setModeRegister(ContinuousMeasurement);
+	hmc.setConfigRegA((ConfigRegA){ AvgSamples1, DataRate_75, NormalMode });
+//	hmc.setConfigRegB(GAIN_0);
 
 	L3G4200D l3g;
 	// set up GPIO interrupt
@@ -95,16 +90,13 @@ int main() {
 //			cout << l3g.dataToString(false) << endl;
 			mFile << l3g.dataToFile(false, ',') << ",";
 
-//			if (hmc.getStatus().DataReady)
-//			{
-				HMC::Data data = hmc.getDataXYZ();
-				cout << data.toString(false) << endl;
-				mFile << data.toString(false) << endl;
-				printf("Heading (deg): %f\n", data.getHeadingDeg());
-//			}
-//			else {
-//				cout << "Data not ready" << endl;
-//			}
+
+			//HMC::Data data = hmc.getDataXYZ();
+			hmc.getSensorData();
+			cout << hmc.dataToString(false) << endl;
+//			cout << data.toString(false) << endl;
+			mFile << hmc.dataToFile(false, ',') << endl;
+//			printf("Heading: %f\n", data.getHeadingDeg());
 
 			counter++;
 

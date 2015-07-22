@@ -31,14 +31,12 @@ public:
 
 	virtual ~Sensor();
 	Sensor();
-	Sensor(int16_t x, int16_t y, int16_t z);
-	Sensor(int16_t x, int16_t y, int16_t z, double multiplier);
 	std::string dataToString();
 	std::string dataToString(bool rawData);
 	std::string dataToFile(bool raw, char formatSpecifier);
 	void format(double);
 	void format();
-	virtual void getSensorData()=0;	// defined in implementation class
+	virtual void getSensorData()=0;	// must be defined in implementation class
 
 };
 

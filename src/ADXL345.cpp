@@ -5,9 +5,9 @@
  *      Author: kbdavid15
  */
 
-#include "../include/ADXL345.h"
+#include <ADXL345.h>
+#include <BlackLib/BlackSPI/BlackSPI.h>
 #include <iostream>
-#include <unistd.h>
 
 using namespace std;
 

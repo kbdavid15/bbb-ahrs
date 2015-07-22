@@ -32,8 +32,9 @@ public:
 	void i2cOpen();
 	void i2cClose();
 	void seti2cAddress(unsigned char address);
-	void sendByte(unsigned char REG_ADDR, unsigned char DATA);
-	unsigned char readByte(unsigned char REG_ADDR);
-	unsigned char readBytes(unsigned char REG_ADDR, ssize_t n);
+    unsigned char readByte(unsigned char REG_ADDR);
+	void readBytes(unsigned char REG_ADDR, unsigned char* readData, unsigned char len);
+	void writeByte(unsigned char REG_ADDR, unsigned char data);
+	void writeBytes(unsigned char REG_ADDR, unsigned char *data, unsigned char len);
 };
 #endif /* LIB_MYI2C_H_ */
