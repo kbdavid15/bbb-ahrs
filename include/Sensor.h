@@ -13,21 +13,33 @@
 
 class Sensor {
 private:
+	int16_t _x, _y, _z;
+	double 	_xf, _yf, _zf;
 	double _dataFormatMultiplier;	// updated whenever the scale sensitivity is changed
 public:
+	// getters and setters
+	int16_t getX();
+	int16_t getY();
+	int16_t getZ();
+	int16_t getXf();
+	int16_t getYf();
+	int16_t getZf();
+	void setX(int16_t);
+	void setY(int16_t);
+	void setZ(int16_t);
+	void setFormatMultiplier(double multiplier);
+
 	virtual ~Sensor();
 	Sensor();
 	Sensor(int16_t x, int16_t y, int16_t z);
 	Sensor(int16_t x, int16_t y, int16_t z, double multiplier);
-	int16_t x, y, z;
-	double 	xf, yf, zf;
 	std::string dataToString();
 	std::string dataToString(bool rawData);
 	std::string dataToFile(bool raw, char formatSpecifier);
 	void format(double);
 	void format();
 	virtual void getSensorData()=0;	// defined in implementation class
-	void setFormatMultiplier(double multiplier);
+
 };
 
 #endif /* SENSOR_H_ */

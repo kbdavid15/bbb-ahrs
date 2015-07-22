@@ -30,13 +30,13 @@ void L3G4200D::getSensorData() {
 	uint8_t recvBytes[7];
 	spi.readBytes(OUT_X_L, recvBytes, sizeof(recvBytes));
 	if (_ControlReg4.ble == BigEndian) {
-		x = ((recvBytes[2] << 8) | recvBytes[1]);
-		y = ((recvBytes[4] << 8) | recvBytes[3]);
-		z = ((recvBytes[6] << 8) | recvBytes[5]);
+		setX((recvBytes[2] << 8) | recvBytes[1]);
+		setY((recvBytes[4] << 8) | recvBytes[3]);
+		setZ((recvBytes[6] << 8) | recvBytes[5]);
 	} else {
-		x = ((recvBytes[1] << 8) | recvBytes[2]);
-		y = ((recvBytes[3] << 8) | recvBytes[4]);
-		z = ((recvBytes[5] << 8) | recvBytes[6]);
+		setX((recvBytes[1] << 8) | recvBytes[2]);
+		setY((recvBytes[3] << 8) | recvBytes[4]);
+		setZ((recvBytes[5] << 8) | recvBytes[6]);
 	}
 }
 

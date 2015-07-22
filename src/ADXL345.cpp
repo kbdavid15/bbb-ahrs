@@ -124,9 +124,9 @@ AvgData ADXL345::averageDataPoints(uint8_t numPoints) {
 
 	for (uint8_t i = 0; i < numPoints; i++) {
 		getSensorData();
-		total_x += x;
-		total_y += y;
-		total_z += z;
+		total_x += getX();
+		total_y += getY();
+		total_z += getZ();
 		nanosleep(&sleepTimeSpec, NULL);
 	}
 	AvgData avg;
@@ -172,7 +172,7 @@ void ADXL345::resetOffset() {
 void ADXL345::getSensorData() {
 	uint8_t recvBytes[7];
 	spi.readBytes(DATAX0, recvBytes, sizeof(recvBytes));
-	x = ((int)(recvBytes[2] << 8) | (int)recvBytes[1]);
-	y = ((int)(recvBytes[4] << 8) | (int)recvBytes[3]);
-	z = ((int)(recvBytes[6] << 8) | (int)recvBytes[5]);
+	setX((int)(recvBytes[2] << 8) | (int)recvBytes[1]);
+	setY((int)(recvBytes[4] << 8) | (int)recvBytes[3]);
+	setZ((int)(recvBytes[6] << 8) | (int)recvBytes[5]);
 }

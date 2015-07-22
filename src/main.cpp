@@ -47,14 +47,12 @@ int main() {
 	setitimer ( ITIMER_REAL, &timer, NULL );
 
 	// create device objects and initialize
-//	HMC::HMC5883L hmc;
-//	hmc.setModeRegister(HMC::ContinuousMeasurement);
-//	hmc.setConfigRegA(HMC::DATA_RATE_75 | HMC::MEAS_MODE_NORM);
-//	hmc.setConfigRegB(HMC::GAIN_0);
-//
+	HMC::HMC5883L hmc;
+	hmc.setModeRegister(HMC::ContinuousMeasurement);
+	hmc.setConfigRegA(HMC::DATA_RATE_75 | HMC::MEAS_MODE_NORM);
+	hmc.setConfigRegB(HMC::GAIN_0);
+
 	L3G4200D l3g;
-
-
 	// set up GPIO interrupt
 //	BlackLib::BlackGPIO adxInt1(BlackLib::GPIO_60, BlackLib::input, BlackLib::SecureMode);
 
@@ -89,23 +87,24 @@ int main() {
 	{
 		if (updateDataFlag)
 		{
+			adx.getSensorData();
+			mFile << adx.dataToFile(false, ',') << ",";
+//			cout << adx.dataToString(false) << endl;
+
+			l3g.getSensorData();
+//			cout << l3g.dataToString(false) << endl;
+			mFile << l3g.dataToFile(false, ',') << ",";
+
 //			if (hmc.getStatus().DataReady)
 //			{
-//				HMC::Data data = hmc.getDataXYZ();
-//				cout << data.toString(false) << endl;
-//				printf("Heading (deg): %f\n", data.getHeadingDeg());
+				HMC::Data data = hmc.getDataXYZ();
+				cout << data.toString(false) << endl;
+				mFile << data.toString(false) << endl;
+				printf("Heading (deg): %f\n", data.getHeadingDeg());
 //			}
 //			else {
 //				cout << "Data not ready" << endl;
 //			}
-
-			adx.getSensorData();
-			mFile << adx.dataToFile(false, ',') << ",";
-			cout << adx.dataToString(false) << endl;
-
-			l3g.getSensorData();
-//			cout << l3g.dataToString(false) << endl;
-			mFile << l3g.dataToFile(false, ',') << endl;
 
 			counter++;
 

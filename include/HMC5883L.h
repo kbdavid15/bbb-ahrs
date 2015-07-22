@@ -218,9 +218,9 @@ namespace HMC {
 				return this->toString();
 			} else {
 				std::stringstream ss;
-				ss << "X: " << fx << "\t";
-				ss << "Y: " << fy << "\t";
-				ss << "Z: " << fz;
+				ss << fx << ",";
+				ss << fy << ",";
+				ss << fz;
 				return ss.str();
 			}
 		}

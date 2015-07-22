@@ -84,7 +84,8 @@ enum DataRate : uint8_t {
 	ODR_12_5 	= 0b0111,
 	ODR_6_25 	= 0b0110
 };
-/*	+----+----+----+-----------+----+----+----+----+
+/*
++----+----+----+-----------+----+----+----+----+
 | D7 | D6 | D5 |     D4    | D3 | D2 | D1 | D0 |
 +----+----+----+-----------+----+----+----+----+
 |  0 |  0 |  0 | LOW_POWER |        Rate       |
@@ -107,8 +108,8 @@ struct PwrDataRate {
 	}
 };
 
-
-/*	+----+----+---------+
+/*
++----+----+---------+
 | D1 | D0 | g Range |
 +----+----+---------+
 |  0 |  0 | ±2 g    |
@@ -165,100 +166,6 @@ struct DataFormat {
 				(justify << 2)   | range);
 	}
 };
-
-//	struct Data {
-//		int16_t x, y, z;
-//		double 	xg, yg, zg;
-//		bool 	fullResMode;
-//
-//		std::string toString() {
-//			std::stringstream ss;
-//			ss << "X: " << x << "\t";
-//			ss << "Y: " << y << "\t";
-//			ss << "Z: " << z;
-//			return ss.str();
-//		}
-//		std::string toString(bool raw, char formatSpecifier) {
-//			std::stringstream ss;
-//			if (raw) {
-//				ss << x << formatSpecifier;
-//				ss << y << formatSpecifier;
-//				ss << z;
-//			} else {
-//				ss << xg << formatSpecifier;
-//				ss << yg << formatSpecifier;
-//				ss << zg;
-//			}
-//			return ss.str();
-//		}
-//		std::string toString(bool rawData) {
-//			std::stringstream ss;
-//			if (rawData) {
-//				ss << "X: " << x << "\t";
-//				ss << "Y: " << y << "\t";
-//				ss << "Z: " << z;
-//			} else {
-//				ss << "Xg: " << xg << "\t";
-//				ss << "Yg: " << yg << "\t";
-//				ss << "Zg: " << zg;
-//			}
-//
-//			return ss.str();
-//		}
-//
-//		//Convert the accelerometer value to G's.
-//		//With 10 bits measuring over a +/-4g range we can find how to convert by using the equation:
-//		//Gs = Measurement Value * (G-range/(2^10)) or Gs = Measurement Value * (8/1024)
-//		void convertToG(bool fullResMode, DataRange range) {
-//			double scaleFactor;
-//			if (fullResMode) {
-//				scaleFactor = 3.9/1000;
-//			} else {
-//				switch (range) {
-//				case DataRange2g:
-//					scaleFactor = 4.0/1024;
-//					break;
-//				case DataRange4g:
-//					scaleFactor = 8.0/1024;
-//					break;
-//				case DataRange8g:
-//					scaleFactor = 16.0/1024;
-//					break;
-//				case DataRange16g:
-//					scaleFactor = 32.0/1024;
-//					break;
-//				}
-//			}
-//			xg = x * scaleFactor;
-//			yg = y * scaleFactor;
-//			zg = z * scaleFactor;
-//		}
-//		void convertToG(DataFormat format) {
-//			double scaleFactor;
-//			if (format.fullRes) {
-//				scaleFactor = 3.9/1000;
-//			} else {
-//				switch (format.range) {
-//				case DataRange2g:
-//					scaleFactor = 4.0/1024;
-//					break;
-//				case DataRange4g:
-//					scaleFactor = 8.0/1024;
-//					break;
-//				case DataRange8g:
-//					scaleFactor = 16.0/1024;
-//					break;
-//				case DataRange16g:
-//					scaleFactor = 32.0/1024;
-//					break;
-//				}
-//			}
-//			xg = x * scaleFactor;
-//			yg = y * scaleFactor;
-//			zg = z * scaleFactor;
-//		}
-//
-//	};
 
 struct AvgData {
 	double x, y, z;
@@ -352,10 +259,6 @@ public:
 	unsigned char getInterruptSource();
 	DataFormat getDataFormat();
 	void setDataFormat(DataFormat);
-	int16_t getDataX();
-	int16_t getDataY();
-	int16_t getDataZ();
-//	Data getXYZ();
 	unsigned char getFIFOCtrl();
 	void setFIFOCtrl(unsigned char);
 	unsigned char getFIFOStatus();
