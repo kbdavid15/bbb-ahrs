@@ -13,7 +13,6 @@
 #include <unistd.h>
 
 #include "../include/myi2c.h"
-//#includ e "../include/regaddr.h"
 #include "../include/BlackLib/BlackSPI/BlackSPI.h"
 #include "../include/BlackLib/BlackGPIO/BlackGPIO.h"
 #include "../include/HMC5883L.h"
@@ -59,20 +58,20 @@ int main() {
 	// set up GPIO interrupt
 //	BlackLib::BlackGPIO adxInt1(BlackLib::GPIO_60, BlackLib::input, BlackLib::SecureMode);
 
-	ADX::ADXL345 adx;
+	ADXL345 adx;
 	adx.startSelfTest();
 	//adx.resetOffset();
 	adx.calibrateOffset();
 
-	ADX::DataFormat format;
+	DataFormat format;
 	format.fullRes = 1;
-	format.range = ADX::DataRange4g;
+	format.range = DataRange4g;
 	format.justify = 0;
 	adx.setDataFormat(format);	// value of 0x0B sets full resolution mode and range to +/- 16g
 	adx.setPowerCtrl(0x08);		// value of 0x08 enables measurement mode
 	//adx.setInterruptEnable(0x00);	// disables interrupts
 	adx.setInterruptEnable(0x80);	// value of 0x80 enables DataReady bit
-	ADX::PwrDataRate odr(false, ADX::ODR_200); // set data rate to 100Hz
+	PwrDataRate odr(false, ODR_200); // set data rate to 100Hz
 	adx.setDataRate(odr);
 
 	// wait 1.1ms + 1/ODR
@@ -100,14 +99,12 @@ int main() {
 //				cout << "Data not ready" << endl;
 //			}
 
-			ADX::Data d = adx.getXYZ();
-			d.convertToG(format);
-			//cout << counter << ": " << d.toString() << endl;
-			mFile << d.toString(false, ',') << ",";
-//			cout << d.toString(false) << endl;
+			adx.getSensorData();
+			mFile << adx.dataToFile(false, ',') << ",";
+			cout << adx.dataToString(false) << endl;
 
 			l3g.getSensorData();
-			cout << l3g.dataToString(false) << endl;
+//			cout << l3g.dataToString(false) << endl;
 			mFile << l3g.dataToFile(false, ',') << endl;
 
 			counter++;
@@ -116,23 +113,6 @@ int main() {
 		}
 		if (counter > 500) break;
 	}
-
-//	printf("L3G4200D ID (0x0F): %x\n", l3g.getDeviceID());
-//	printf("L3G4200D Range: %x\n", l3g.getMeasurementRange());
-//	printf("Temperature: %d\n", l3g.getTemperature());
-//	for (int i = 0; i < 200; i ++) {
-//		printf("Temperature: %d\n", l3g.getTemperature());
-//		L3G::DPS d = l3g.getDPS();
-//		cout << d.toString() << endl;
-//		usleep(100 * 1000);
-//	}
-//
-//
-//	for (int i = 0; i < 10; i ++) {
-//		ADX::Data d = adx.getXYZ();
-//		cout << d.toString() << endl;
-//		usleep(100 * 1000);
-//	}
 	mFile.close();
 	return 0;
 }
