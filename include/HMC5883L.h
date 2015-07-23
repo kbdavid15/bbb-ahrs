@@ -53,36 +53,7 @@
 #include <sstream>
 #include <math.h>
 
-// Config Register A Bitmasks
-const unsigned char AVG_SAMPLES_1	= 0b00000000;
-const unsigned char AVG_SAMPLES_2	= 0b00100000;
-const unsigned char AVG_SAMPLES_4	= 0b01000000;
-const unsigned char AVG_SAMPLES_8	= 0b01100000;
-/*
-+-----+-----+-----+------------------+
-| DO2 | DO1 | DO0 | Output Rate (Hz) |
-+-----+-----+-----+------------------+
-|   0 |   0 |   0 | 0.75             |
-|   0 |   0 |   1 | 1.5              |
-|   0 |   1 |   0 | 3                |
-|   0 |   1 |   1 | 7.5              |
-|   1 |   0 |   0 | 15 (Default)     |
-|   1 |   0 |   1 | 30               |
-|   1 |   1 |   0 | 75               |
-|   1 |   1 |   1 | Reserved         |
-+-----+-----+-----+------------------+
- */
-const unsigned char DATA_RATE_0_75	= 0b00000000;
-const unsigned char DATA_RATE_1_5	= 0b00000100;
-const unsigned char DATA_RATE_3		= 0b00001000;
-const unsigned char DATA_RATE_7_5	= 0b00001100;
-const unsigned char DATA_RATE_15	= 0b00010000;
-const unsigned char DATA_RATE_30	= 0b00010100;
-const unsigned char DATA_RATE_75	= 0b00011000;
-const unsigned char MEAS_MODE_NORM	= 0b00000000;
-const unsigned char MEAS_MODE_POS	= 0b00000001;
-const unsigned char MEAS_MODE_NEG	= 0b00000010;
-const unsigned char CRA_DEFAULT		= 0x10;
+
 
 /*
 +-----+-----+-----+-------------------+-------------------+---------------------+-----------------------------+
@@ -98,66 +69,20 @@ const unsigned char CRA_DEFAULT		= 0x10;
 |   1 |   1 |   1 | ± 8.1 Ga          | 230               | 4.35                | 0xF800–0x07FF (-2048–2047 ) |
 +-----+-----+-----+-------------------+-------------------+---------------------+-----------------------------+
 */
-// Config Register B Bitmasks
-//	enum GainValue : unsigned char {
-//		GAIN_1370		= 0b00000000,
-//		GAIN_1090		= 0b00100000,
-//		GAIN_820		= 0b01000000,
-//		GAIN_660		= 0b01100000,
-//		GAIN_440		= 0b10000000,
-//		GAIN_390		= 0b10100000,
-//		GAIN_330		= 0b11000000,
-//		GAIN_230		= 0b11100000,
-//		GAIN_DEFAULT	= 0x20
-//	};
+/**
+ *
+ */
 enum GainIdx : unsigned char {
-	GAIN_0,
-	GAIN_1,
-	GAIN_2,
-	GAIN_3,
-	GAIN_4,
-	GAIN_5,
-	GAIN_6,
-	GAIN_7
+	GAIN_0,//!< GAIN_0 - GAIN_1370
+	GAIN_1,//!< GAIN_1 - GAIN_1090 - Default
+	GAIN_2,//!< GAIN_2 - GAIN_820
+	GAIN_3,//!< GAIN_3 - GAIN_660
+	GAIN_4,//!< GAIN_4 - GAIN_440
+	GAIN_5,//!< GAIN_5 - GAIN_390
+	GAIN_6,//!< GAIN_6 - GAIN_330
+	GAIN_7 //!< GAIN_7 - GAIN_230
 };
-struct Gain {
-	//TODO: Convert to nested class instead of struct
-	GainIdx	gIdx;
-	GainIdx	prevGain;
-	bool 	updateFlag;
 
-	unsigned char getConfigRegB() {
-		return (gIdx << GAIN_BIT_OFFSET);
-	}
-	Gain(GainIdx idx) {
-		gIdx = idx;
-		prevGain = idx;
-		updateFlag = true;
-	}
-	Gain() {
-		init();
-	}
-	void updateIdx(GainIdx idx) {
-		if (idx != gIdx) {
-			prevGain = gIdx;
-			gIdx = idx;
-			updateFlag = true;
-		} else {
-			updateFlag = false;
-		}
-	}
-	void init() {
-		gIdx = GAIN_1;	// default
-		prevGain = GAIN_1;
-		updateFlag = false;
-	}
-	GainIdx incrementIdx() {
-		unsigned char i = (unsigned char)gIdx;
-		i++;
-		gIdx = (GainIdx)i;
-		return gIdx;
-	}
-};
 
 enum AvgSamples {
 	AvgSamples1 = 0,
@@ -165,6 +90,19 @@ enum AvgSamples {
 	AvgSamples4,
 	AvgSamples8
 };
+/**
++-----+-----+-----+------------------+
+| DO2 | DO1 | DO0 | Output Rate (Hz) |
++-----+-----+-----+------------------+
+|   0 |   0 |   0 | 0.75             |
+|   0 |   0 |   1 | 1.5              |
+|   0 |   1 |   0 | 3                |
+|   0 |   1 |   1 | 7.5              |
+|   1 |   0 |   0 | 15 (Default)     |
+|   1 |   0 |   1 | 30               |
+|   1 |   1 |   0 | 75               |
+|   1 |   1 |   1 | Reserved         |
++-----+-----+-----+------------------+*/
 enum HMCDataRate {
 	DataRate_0_75 = 0,
 	DataRate_1_5,
@@ -205,54 +143,6 @@ struct ConfigRegA {
 struct SelfTestCal {
 	int16_t X_STP, Y_STP, Z_STP;
 };
-struct Data {
-	int16_t x, y, z;
-	double fx, fy, fz;	// format (gauss)
-
-	Data(int16_t x, int16_t y, int16_t z, uint16_t factor) {
-		this->x = x;
-		this->y = y;
-		this->z = z;
-		calculateGauss(factor);
-	}
-
-	std::string toString() {
-		std::stringstream ss;
-		ss << "X: " << x << "\t";
-		ss << "Y: " << y << "\t";
-		ss << "Z: " << z;
-		return ss.str();
-	}
-	std::string toString(bool optionRaw) {
-		if (optionRaw) {
-			return this->toString();
-		} else {
-			std::stringstream ss;
-			ss << fx << ",";
-			ss << fy << ",";
-			ss << fz;
-			return ss.str();
-		}
-	}
-	double getHeadingDeg() {
-		double deg = 0;
-		if (y > 0) {
-			deg =  90 - ((atan((double)x/y))*180/PI);
-		} else if (y < 0) {
-			deg =  270 - ((atan((double)x/y))*180/PI);
-		} else if (y == 0 && x < 0) {
-			deg = 180.0;
-		} else if (y == 0 && x > 0) {
-			deg = 0.0;
-		}
-		return deg;
-	}
-	void calculateGauss(uint16_t factor) {
-		fx = x / (double) factor;
-		fy = y / (double) factor;
-		fz = z / (double) factor;
-	}
-};
 struct Status {
 	bool DataLocked;
 	bool DataReady;
@@ -264,6 +154,43 @@ enum OperatingMode : unsigned char {
 };
 
 class HMC5883L : public Sensor {
+public:
+	class Gain {
+		//TODO: Convert to nested class instead of struct
+	private:
+		GainIdx	gIdx;
+		GainIdx	prevGain;
+		bool 	updateFlag;
+		void init();
+	public:
+
+		unsigned char getConfigRegB();
+		Gain(GainIdx idx);
+		Gain();
+		void updateIdx(GainIdx idx);
+
+		GainIdx incrementIdx();
+
+		GainIdx getIdx() const {
+			return gIdx;
+		}
+
+		void setIdx(GainIdx idx) {
+			gIdx = idx;
+		}
+
+		GainIdx getPrevGain() const {
+			return prevGain;
+		}
+
+		bool isUpdateFlag() const {
+			return updateFlag;
+		}
+
+		void setUpdateFlag(bool updateFlag) {
+			this->updateFlag = updateFlag;
+		}
+	};
 private:
 	const static uint16_t LSB_PER_GAUSS[];
 	i2cDevice device;
@@ -281,8 +208,7 @@ public:
 	void setConfigRegB(GainIdx gain);
 	OperatingMode getModeRegister();
 	void setModeRegister(OperatingMode mode);
-	Data getDataXYZ();
-	Data getDataReadyXYZ(uint16_t timeout = 100);	//blocking function, returns data when it's ready
+//	Data getDataReadyXYZ(uint16_t timeout = 100);	//blocking function, returns data when it's ready
 	Status getStatus();
 	bool runSelfTest();
 	void dumpAllRegisters(unsigned char * regData, unsigned char len);

@@ -67,16 +67,16 @@ using namespace BlackLib;
 
 	struct CR4 {
 		bool 	 blockDataUpdate = false;	// default: Continuous update
+		Endian 	 ble			 = BigEndian;	// LSB @ lower addresses
 		SelfTest selfTestEnable  = ST_Disabled;
-		Endian 	 ble			 = LittleEndian;	// LSB @ lower addresses
 		Scale 	 scale			 = Scale250;
 		SpiMode  mode			 = SpiMode4Wire;
 
 		CR4() {}
-		CR4(bool blockDataUpdate, SelfTest selfTestEnable, Endian e, Scale scale, SpiMode mode) {
+		CR4(bool blockDataUpdate, Endian e, SelfTest selfTestEnable, Scale scale, SpiMode mode) {
 			this->blockDataUpdate = blockDataUpdate;
-			this->selfTestEnable = selfTestEnable;
 			this->ble = e;
+			this->selfTestEnable = selfTestEnable;
 			this->scale = scale;
 			this->mode = mode;
 		}

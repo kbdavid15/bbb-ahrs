@@ -48,8 +48,6 @@ int main() {
 //	hmc.setConfigRegB(GAIN_0);
 
 	L3G4200D l3g;
-	// set up GPIO interrupt
-//	BlackLib::BlackGPIO adxInt1(BlackLib::GPIO_60, BlackLib::input, BlackLib::SecureMode);
 
 	ADXL345 adx;
 	adx.startSelfTest();

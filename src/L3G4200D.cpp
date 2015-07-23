@@ -14,8 +14,8 @@ const double L3G4200D::DPS_CONV_VAL[] = { 0.00875, 0.0175, 0.07 };
 
 L3G4200D::L3G4200D():spi(BlackLib::SPI1_0, 8, BlackLib::SpiMode3, 2400000) {
 	// set up control registers
+	setControlReg4((CR4) { true, BigEndian, ST_Disabled, Scale500, SpiMode4Wire});
 	setControlReg1((CR1) { ODR_200Hz, BW_1, true, true, true, true });
-	setControlReg4((CR4) { true, ST_Disabled, BigEndian, Scale500, SpiMode4Wire});
 }
 
 L3G4200D::~L3G4200D() {
