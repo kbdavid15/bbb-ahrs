@@ -20,6 +20,7 @@
 using namespace std;
 
 bool updateDataFlag = true;
+const long SAMPLE_RATE_uS = 5000;
 
 void timer_handler(int signum) {
 	updateDataFlag = true;
@@ -35,9 +36,9 @@ int main() {
 	sigaction ( SIGALRM, &sa, NULL );
 
 	timer.it_value.tv_sec = 0;
-	timer.it_value.tv_usec = 5000;
+	timer.it_value.tv_usec = SAMPLE_RATE_uS;
 	timer.it_interval.tv_sec = 0;
-	timer.it_interval.tv_usec = 5000;
+	timer.it_interval.tv_usec = SAMPLE_RATE_uS;
 
 	setitimer ( ITIMER_REAL, &timer, NULL );
 
@@ -56,7 +57,7 @@ int main() {
 
 	DataFormat format;
 	format.fullRes = 1;
-	format.range = DataRange4g;
+	format.range = DataRange2g;
 	format.justify = 0;
 	adx.setDataFormat(format);	// value of 0x0B sets full resolution mode and range to +/- 16g
 	adx.setPowerCtrl(0x08);		// value of 0x08 enables measurement mode
@@ -71,7 +72,7 @@ int main() {
 
 	ofstream mFile;
 	mFile.open("acceldata.csv", ios::out);
-	mFile << "AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ" << endl;
+	mFile << "AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ,IntAccelX,Pitch,Roll" << endl;
 
 	long counter = 0;
 
@@ -82,7 +83,7 @@ int main() {
 		{
 			adx.getSensorData();
 			mFile << adx.dataToFile(false, ',') << ",";
-//			cout << adx.dataToString(false) << endl;
+			cout << adx.dataToString(false) << endl;
 
 			l3g.getSensorData();
 //			cout << l3g.dataToString(false) << endl;
@@ -91,10 +92,14 @@ int main() {
 
 			//HMC::Data data = hmc.getDataXYZ();
 			hmc.getSensorData();
-			cout << hmc.dataToString(false) << endl;
+//			cout << hmc.dataToString(false) << endl;
 //			cout << data.toString(false) << endl;
-			mFile << hmc.dataToFile(false, ',') << endl;
+			mFile << hmc.dataToFile(false, ',') << ",";
 //			printf("Heading: %f\n", data.getHeadingDeg());
+
+			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";
+			mFile << adx.getPitch() << ",";
+			mFile << adx.getRoll() << endl;
 
 			counter++;
 
@@ -103,5 +108,6 @@ int main() {
 		if (counter > 500) break;
 	}
 	mFile.close();
+
 	return 0;
 }

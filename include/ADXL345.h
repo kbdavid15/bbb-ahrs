@@ -124,7 +124,8 @@ enum DataRange : uint8_t {
 	DataRange16g
 };
 
-/*	+-----------+-----+------------+----+----------+---------+----+----+
+/*
++-----------+-----+------------+----+----------+---------+----+----+
 | D7        | D6  | D5         | D4 | D3       | D2      | D1 | D0 |
 +-----------+-----+------------+----+----------+---------+----+----+
 | SELF_TEST | SPI | INT_INVERT | 0  | FULL_RES | Justify | Range   |
@@ -270,6 +271,8 @@ public:
 	long getWaitTime(bool);
 	void waitTime(bool);
 	virtual void getSensorData();
+	double getPitch();
+	double getRoll();
 };
 
 #endif /* ADXL345_H_ */

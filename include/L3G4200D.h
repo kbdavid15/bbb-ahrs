@@ -150,6 +150,10 @@ using namespace BlackLib;
 		CR1 _ControlReg1;
 		CR4 _ControlReg4;
 		const static double DPS_CONV_VAL[];
+		const static double DATA_RATE_VAL[];
+		int16_t _xOffset = 0;
+		int16_t _yOffset = 0;
+		int16_t _zOffset = 0;
 	public:
 		L3G4200D();
 		~L3G4200D();
@@ -160,7 +164,8 @@ using namespace BlackLib;
 		void setControlReg1(CR1);
 		unsigned char getTemperature();
 		virtual void getSensorData();
-
+		void calculateOffset();
+		long getWaitTime();
 	};
 
 #endif /* L3G4200D_H_ */

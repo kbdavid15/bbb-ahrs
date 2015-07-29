@@ -8,6 +8,12 @@
 #include <ADXL345.h>
 #include <BlackLib/BlackSPI/BlackSPI.h>
 #include <iostream>
+#include <math.h>
+
+#ifndef PI
+#define PI				3.14159265359
+#endif
+#define G_CONVERSION	0.101972
 
 using namespace std;
 
@@ -175,4 +181,18 @@ void ADXL345::getSensorData() {
 	setX((int)(recvBytes[2] << 8) | (int)recvBytes[1]);
 	setY((int)(recvBytes[4] << 8) | (int)recvBytes[3]);
 	setZ((int)(recvBytes[6] << 8) | (int)recvBytes[5]);
+}
+// degrees
+double ADXL345::getPitch() {
+	double x = getXf();
+	double y = getYf();
+	double z = getZf();
+	double value = atan(y/sqrt(pow(x,2) + pow(z,2)))*(180/PI);
+	return value;
+}
+// degrees
+double ADXL345::getRoll() {
+	double x = getXf();
+	double z = getZf();
+	return atan(-x/z)*(180/PI);
 }

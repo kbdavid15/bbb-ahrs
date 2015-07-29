@@ -9,6 +9,8 @@
 
 using namespace std;
 
+const uint8_t Sensor::QUEUE_SIZE = 2;
+
 Sensor::~Sensor() {
 	// TODO Auto-generated destructor stub
 }
@@ -21,6 +23,12 @@ Sensor::Sensor() {
 	_yf = 0;
 	_zf = 0;
 	_dataFormatMultiplier = 0;
+	_xTrapLast = 0;
+	_yTrapLast = 0;
+	_zTrapLast = 0;
+	_xfLast = 0;
+	_yfLast = 0;
+	_zfLast = 0;
 }
 
 int16_t Sensor::getX() {
@@ -32,23 +40,41 @@ int16_t Sensor::getY() {
 int16_t Sensor::getZ() {
 	return _z;
 }
-int16_t Sensor::getXf() {
+double Sensor::getXf() {
 	return _xf;
 }
-int16_t Sensor::getYf() {
+double Sensor::getYf() {
 	return _yf;
 }
-int16_t Sensor::getZf() {
+double Sensor::getZf() {
 	return _zf;
 }
-void Sensor::setX(int16_t x){
+void Sensor::setX(int16_t x) {
+	_xfLast = _xf;
 	_x = x;
+	_xf = _x * _dataFormatMultiplier;
+//	_xQ.push_back(x);
+//	if (_xQ.size() > QUEUE_SIZE) {
+//		_xQ.pop_front();
+//	}
 }
 void Sensor::setY(int16_t y){
+	_yfLast = _yf;
 	_y = y;
+	_yf = _y * _dataFormatMultiplier;
+//	_yQ.push_back(y);
+//	if (_yQ.size() > QUEUE_SIZE) {
+//		_yQ.pop_front();
+//	}
 }
 void Sensor::setZ(int16_t z){
+	_zfLast = _zf;
 	_z = z;
+	_zf = _z * _dataFormatMultiplier;
+//	_zQ.push_back(z);
+//	if (_zQ.size() > QUEUE_SIZE) {
+//		_zQ.pop_front();
+//	}
 }
 string Sensor::dataToString() {
 	stringstream ss;
@@ -64,7 +90,7 @@ string Sensor::dataToFile(bool raw, char formatSpecifier) {
 		ss << _y << formatSpecifier;
 		ss << _z;
 	} else {
-		format();
+//		format();
 		ss << _xf << formatSpecifier;
 		ss << _yf << formatSpecifier;
 		ss << _zf;
@@ -79,7 +105,7 @@ string Sensor::dataToString(bool rawData) {
 		ss << "Y: " << _y << "\t";
 		ss << "Z: " << _z;
 	} else {
-		format();
+//		format();
 		ss << "Xf: " << _xf << "\t";
 		ss << "Yf: " << _yf << "\t";
 		ss << "Zf: " << _zf;
@@ -101,4 +127,10 @@ void Sensor::format() {
 
 void Sensor::setFormatMultiplier(double multiplier) {
 	_dataFormatMultiplier = multiplier;
+}
+double Sensor::trapX(long uTs) {
+	double Ts = uTs / 1000000.0;
+//	_xTrapLast = (_xTrapLast) + (1/(2*(double)fs)) * (_xLast + _x);
+	_xTrapLast = (_xTrapLast) + (Ts/2.0) * (_xfLast + _xf);
+	return _xTrapLast;
 }
