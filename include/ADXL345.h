@@ -270,7 +270,7 @@ public:
 	struct timespec getInitWaitTime();
 	long getWaitTime(bool);
 	void waitTime(bool);
-	virtual void getSensorData();
+	virtual DataPoint getSensorData();
 	double getPitch();
 	double getRoll();
 };

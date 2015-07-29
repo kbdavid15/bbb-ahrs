@@ -16,6 +16,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <DataPoint.h>
 
 using namespace std;
 
@@ -81,20 +82,20 @@ int main() {
 	{
 		if (updateDataFlag)
 		{
-			adx.getSensorData();
-			mFile << adx.dataToFile(false, ',') << ",";
-			cout << adx.dataToString(false) << endl;
+			DataPoint p = adx.getSensorData();
+			mFile << p.toFile(false, ',') << ",";
+			cout << p.toString(false) << endl;
 
-			l3g.getSensorData();
+			p = l3g.getSensorData();
 //			cout << l3g.dataToString(false) << endl;
-			mFile << l3g.dataToFile(false, ',') << ",";
+			mFile << p.toFile(false, ',') << ",";
 
 
 			//HMC::Data data = hmc.getDataXYZ();
-			hmc.getSensorData();
+			p = hmc.getSensorData();
 //			cout << hmc.dataToString(false) << endl;
 //			cout << data.toString(false) << endl;
-			mFile << hmc.dataToFile(false, ',') << ",";
+			mFile << p.toFile(false, ',') << ",";
 //			printf("Heading: %f\n", data.getHeadingDeg());
 
 			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";

@@ -9,6 +9,8 @@
 #define DATAPOINT_H_
 
 #include <stdint.h>
+#include <string>
+
 
 class DataPoint {
 private:
@@ -22,6 +24,10 @@ public:
 
 	static DataPoint average(DataPoint* points, unsigned int length);
 	static DataPoint copyFormatFrom(DataPoint point);
+
+	std::string toString();
+	std::string toString(bool rawData);
+	std::string toFile(bool rawData, char formatSpecifier);
 
 	int16_t getX() const {
 		return x;
@@ -53,8 +59,10 @@ public:
 	double getZf() const {
 		return zf;
 	}
+
+	void setFormatMultiplier(double dataFormatMult) {
+		this->dataFormatMult = dataFormatMult;
+	}
 };
-
-
 
 #endif /* DATAPOINT_H_ */

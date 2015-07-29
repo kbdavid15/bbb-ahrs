@@ -6,7 +6,8 @@
  */
 
 #include <DataPoint.h>
-
+#include <sstream>
+using namespace std;
 
 DataPoint DataPoint::operator -(const DataPoint& p)  {
 	DataPoint newData = copyFormatFrom(p);
@@ -36,4 +37,37 @@ DataPoint DataPoint::copyFormatFrom(DataPoint point) {
 	DataPoint newPoint;
 	newPoint.dataFormatMult = point.dataFormatMult;
 	return newPoint;
+}
+string DataPoint::toString() {
+	stringstream ss;
+	ss << "X: " << x << "\t";
+	ss << "Y: " << y << "\t";
+	ss << "Z: " << z;
+	return ss.str();
+}
+string DataPoint::toFile(bool rawData, char formatSpecifier) {
+	stringstream ss;
+	if (rawData) {
+		ss << x << formatSpecifier;
+		ss << y << formatSpecifier;
+		ss << z;
+	} else {
+		ss << xf << formatSpecifier;
+		ss << yf << formatSpecifier;
+		ss << zf;
+	}
+	return ss.str();
+}
+string DataPoint::toString(bool rawData) {
+	stringstream ss;
+	if (rawData) {
+		ss << "X: " << x << "\t";
+		ss << "Y: " << y << "\t";
+		ss << "Z: " << z;
+	} else {
+		ss << "Xf: " << xf << "\t";
+		ss << "Yf: " << yf << "\t";
+		ss << "Zf: " << zf;
+	}
+	return ss.str();
 }

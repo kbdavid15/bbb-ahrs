@@ -20,36 +20,22 @@ private:
 	std::deque<double> _xQ, _yQ, _zQ;
 	double _xfLast, _yfLast, _zfLast;
 	double _xTrapLast, _yTrapLast, _zTrapLast;
-	int16_t _x, _y, _z;
-	double 	_xf, _yf, _zf;
-	double _dataFormatMultiplier;	// updated whenever the scale sensitivity is changed
+	DataPoint lastDataPoint;
+//	int16_t _x, _y, _z;
+//	double 	_xf, _yf, _zf;
+//	double _dataFormatMultiplier;	// updated whenever the scale sensitivity is changed
 public:
+	DataPoint dataPoint;
 	// getters and setters
-	int16_t getX();
-	int16_t getY();
-	int16_t getZ();
-	double getXf();
-	double getYf();
-	double getZf();
-	void setX(int16_t);
-	void setY(int16_t);
-	void setZ(int16_t);
-	void setFormatMultiplier(double multiplier);
-
 	virtual ~Sensor();
 	Sensor();
-	std::string dataToString();
-	std::string dataToString(bool rawData);
-	std::string dataToFile(bool raw, char formatSpecifier);
-	void format(double);
-	void format();
 	/**
 	 *
 	 * @param Sample rate in microseconds
 	 * @return
 	 */
 	double trapX(long);	// trapezoidal integral
-	virtual void getSensorData()=0;	// must be defined in implementation class
+	virtual DataPoint getSensorData()=0;	// must be defined in implementation class
 
 	const std::deque<double>& getXQ() const {
 		return _xQ;

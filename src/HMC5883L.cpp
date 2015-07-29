@@ -143,12 +143,12 @@ void HMC5883L::dumpAllRegisters(unsigned char* regData, unsigned char len) {
 	}
 	cout << endl;
 }
-void HMC5883L::getSensorData() {
+DataPoint HMC5883L::getSensorData() {
 	uint8_t recvBytes[6];
 	device.readBytes(HMC_DATA_2B_START_X, recvBytes, sizeof(recvBytes));
-	setX((recvBytes[0] << 8) + (recvBytes[1]));
-	setZ((recvBytes[2] << 8) + (recvBytes[3]));
-	setY((recvBytes[4] << 8) + (recvBytes[5]));
+	dataPoint.setX((recvBytes[0] << 8) + (recvBytes[1]));
+	dataPoint.setZ((recvBytes[2] << 8) + (recvBytes[3]));
+	dataPoint.setY((recvBytes[4] << 8) + (recvBytes[5]));
 	GainIdx dataGain;
 	if (_gain.isUpdateFlag()) {
 		// use previous gain
@@ -157,17 +157,20 @@ void HMC5883L::getSensorData() {
 	} else {
 		dataGain = _gain.getIdx();
 	}
-	setFormatMultiplier(1.0/LSB_PER_GAUSS[dataGain]);
+	dataPoint.setFormatMultiplier(1.0/LSB_PER_GAUSS[dataGain]);
+	return dataPoint;
 }
 double HMC5883L::getHeadingDeg(){
 	double deg = 0;
-	if (getY() > 0) {
-		deg =  90 - ((atan((double)getX()/getY()))*180/PI);
-	} else if (getY() < 0) {
-		deg =  270 - ((atan((double)getX()/getY()))*180/PI);
-	} else if (getY() == 0 && getX() < 0) {
+	int16_t x = dataPoint.getX();
+	int16_t y = dataPoint.getY();
+	if (y > 0) {
+		deg =  90 - ((atan((double)x/y))*180/PI);
+	} else if (y < 0) {
+		deg =  270 - ((atan((double)x/y))*180/PI);
+	} else if (y == 0 && x < 0) {
 		deg = 180.0;
-	} else if (getY() == 0 && getX() > 0) {
+	} else if (y == 0 && x > 0) {
 		deg = 0.0;
 	}
 	return deg;

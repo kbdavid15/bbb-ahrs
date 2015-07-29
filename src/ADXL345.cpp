@@ -37,20 +37,20 @@ void ADXL345::setDataFormat(DataFormat format) {
 	spi.writeByte(DATA_FORMAT, format.getData());
 	// set the scale format multiplier
 	if (format.fullRes) {
-		setFormatMultiplier(3.9/1000);
+		dataPoint.setFormatMultiplier(3.9/1000);
 	} else {
 		switch (format.range) {
 		case DataRange2g:
-			setFormatMultiplier(4.0/1024);
+			dataPoint.setFormatMultiplier(4.0/1024);
 			break;
 		case DataRange4g:
-			setFormatMultiplier(8.0/1024);
+			dataPoint.setFormatMultiplier(8.0/1024);
 			break;
 		case DataRange8g:
-			setFormatMultiplier(16.0/1024);
+			dataPoint.setFormatMultiplier(16.0/1024);
 			break;
 		case DataRange16g:
-			setFormatMultiplier(32.0/1024);
+			dataPoint.setFormatMultiplier(32.0/1024);
 			break;
 		}
 	}
@@ -130,9 +130,9 @@ AvgData ADXL345::averageDataPoints(uint8_t numPoints) {
 
 	for (uint8_t i = 0; i < numPoints; i++) {
 		getSensorData();
-		total_x += getX();
-		total_y += getY();
-		total_z += getZ();
+		total_x += dataPoint.getX();
+		total_y += dataPoint.getY();
+		total_z += dataPoint.getZ();
 		nanosleep(&sleepTimeSpec, NULL);
 	}
 	AvgData avg;
@@ -175,24 +175,25 @@ void ADXL345::resetOffset() {
 	uint8_t offset[] = { 0, 0, 0};
 	spi.writeBytes(OFFSET_X, offset, 3);
 }
-void ADXL345::getSensorData() {
+DataPoint ADXL345::getSensorData() {
 	uint8_t recvBytes[7];
 	spi.readBytes(DATAX0, recvBytes, sizeof(recvBytes));
-	setX((int)(recvBytes[2] << 8) | (int)recvBytes[1]);
-	setY((int)(recvBytes[4] << 8) | (int)recvBytes[3]);
-	setZ((int)(recvBytes[6] << 8) | (int)recvBytes[5]);
+	dataPoint.setX((int)(recvBytes[2] << 8) | (int)recvBytes[1]);
+	dataPoint.setY((int)(recvBytes[4] << 8) | (int)recvBytes[3]);
+	dataPoint.setZ((int)(recvBytes[6] << 8) | (int)recvBytes[5]);
+	return dataPoint;
 }
 // degrees
 double ADXL345::getPitch() {
-	double x = getXf();
-	double y = getYf();
-	double z = getZf();
+	double x = dataPoint.getXf();
+	double y = dataPoint.getYf();
+	double z = dataPoint.getZf();
 	double value = atan(y/sqrt(pow(x,2) + pow(z,2)))*(180/PI);
 	return value;
 }
 // degrees
 double ADXL345::getRoll() {
-	double x = getXf();
-	double z = getZf();
+	double x = dataPoint.getXf();
+	double z = dataPoint.getZf();
 	return atan(-x/z)*(180/PI);
 }

@@ -212,7 +212,7 @@ public:
 	Status getStatus();
 	bool runSelfTest();
 	void dumpAllRegisters(unsigned char * regData, unsigned char len);
-	virtual void getSensorData();
+	virtual DataPoint getSensorData();
 	double getHeadingDeg();
 };
 #endif /* HMC5883L_H_ */

@@ -27,25 +27,26 @@ unsigned char L3G4200D::getDeviceID() {
 	return spi.readByte(WHO_AM_I);
 }
 
-void L3G4200D::getSensorData() {
+DataPoint L3G4200D::getSensorData() {
 	uint8_t recvBytes[7];
 	spi.readBytes(OUT_X_L, recvBytes, sizeof(recvBytes));
 	if (_ControlReg4.ble == BigEndian) {
-		setX((recvBytes[2] << 8) | recvBytes[1]);
-		setY((recvBytes[4] << 8) | recvBytes[3]);
-		setZ((recvBytes[6] << 8) | recvBytes[5]);
+		dataPoint.setX((recvBytes[2] << 8) | recvBytes[1]);
+		dataPoint.setY((recvBytes[4] << 8) | recvBytes[3]);
+		dataPoint.setZ((recvBytes[6] << 8) | recvBytes[5]);
 	} else {
-		setX((recvBytes[1] << 8) | recvBytes[2]);
-		setY((recvBytes[3] << 8) | recvBytes[4]);
-		setZ((recvBytes[5] << 8) | recvBytes[6]);
+		dataPoint.setX((recvBytes[1] << 8) | recvBytes[2]);
+		dataPoint.setY((recvBytes[3] << 8) | recvBytes[4]);
+		dataPoint.setZ((recvBytes[5] << 8) | recvBytes[6]);
 	}
+	return dataPoint;
 }
 
 void L3G4200D::setControlReg4(CR4 reg) {
 	spi.writeByte(CTRL_REG4, reg.getData());
 	_ControlReg4 = reg;
 	// set the gyro format multiplier based on range
-	setFormatMultiplier(DPS_CONV_VAL[_ControlReg4.scale]);
+	dataPoint.setFormatMultiplier(DPS_CONV_VAL[_ControlReg4.scale]);
 }
 CR4 L3G4200D::getMeasurementRange() {
 	uint8_t regVal = spi.readByte(CTRL_REG4);

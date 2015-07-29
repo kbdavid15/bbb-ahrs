@@ -163,7 +163,7 @@ using namespace BlackLib;
 		CR1 getControlReg1();
 		void setControlReg1(CR1);
 		unsigned char getTemperature();
-		virtual void getSensorData();
+		virtual DataPoint getSensorData();
 		void calculateOffset();
 		long getWaitTime();
 	};
