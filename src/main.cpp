@@ -17,6 +17,7 @@
 #include <iostream>
 #include <string>
 #include <DataPoint.h>
+#include <math.h>
 
 using namespace std;
 
@@ -50,6 +51,7 @@ int main() {
 //	hmc.setConfigRegB(GAIN_0);
 
 	L3G4200D l3g;
+	l3g.calculateOffset();
 
 	ADXL345 adx;
 	adx.startSelfTest();
@@ -73,7 +75,7 @@ int main() {
 
 	ofstream mFile;
 	mFile.open("acceldata.csv", ios::out);
-	mFile << "AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ,IntAccelX,Pitch,Roll" << endl;
+	mFile << "AccelX,AccelY,AccelZ,Pitch,Roll,IntAccelX,GyroX,GyroY,GyroZ,IntGyroZ,MagX,MagY,MagZ,Heading,Yaw" << endl;
 
 	long counter = 0;
 
@@ -84,29 +86,37 @@ int main() {
 		{
 			DataPoint p = adx.getSensorData();
 			mFile << p.toFile(false, ',') << ",";
-			cout << p.toString(false) << endl;
+			double pitch = adx.getPitch();
+			double roll = adx.getRoll();
+			mFile << pitch << ",";
+			mFile << roll << ",";
+			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";
+//			cout << p.toString(false) << endl;
 
 			p = l3g.getSensorData();
-//			cout << l3g.dataToString(false) << endl;
+			cout << p.toString(false) << endl;
 			mFile << p.toFile(false, ',') << ",";
+			mFile << l3g.trapZ(SAMPLE_RATE_uS) << ",";
 
-
-			//HMC::Data data = hmc.getDataXYZ();
 			p = hmc.getSensorData();
-//			cout << hmc.dataToString(false) << endl;
-//			cout << data.toString(false) << endl;
+//			cout << p.toString(false) << endl;
 			mFile << p.toFile(false, ',') << ",";
-//			printf("Heading: %f\n", data.getHeadingDeg());
+			mFile << hmc.getHeadingDeg() << ",";
 
-			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";
-			mFile << adx.getPitch() << ",";
-			mFile << adx.getRoll() << endl;
+			// calculate yaw rate
+			double XH = (p.getXf() * cos(pitch)) +
+						(p.getYf() * sin(pitch) * sin(roll)) +
+						(p.getZf() * sin(pitch) * cos(roll));
+			double YH = (p.getYf() * cos(roll)) + (p.getZf() * sin(roll));
+			double yaw = atan2(-YH, XH) *(180/PI) ;
+
+			mFile << yaw << endl;
 
 			counter++;
 
 			updateDataFlag = false;
 		}
-		if (counter > 500) break;
+		if (counter > 1000) break;
 	}
 	mFile.close();
 

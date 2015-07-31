@@ -15,7 +15,7 @@ const double L3G4200D::DATA_RATE_VAL[] = { 100, 200, 400, 800};
 
 L3G4200D::L3G4200D():spi(BlackLib::SPI1_0, 8, BlackLib::SpiMode3, 2400000) {
 	// set up control registers
-	setControlReg4((CR4) { true, BigEndian, ST_Disabled, Scale500, SpiMode4Wire});
+	setControlReg4((CR4) { true, BigEndian, ST_Disabled, Scale250, SpiMode4Wire});
 	setControlReg1((CR1) { ODR_200Hz, BW_1, true, true, true, true });
 }
 
@@ -28,16 +28,17 @@ unsigned char L3G4200D::getDeviceID() {
 }
 
 DataPoint L3G4200D::getSensorData() {
+	setLastDataPoint(dataPoint);	// save last data point before updating
 	uint8_t recvBytes[7];
 	spi.readBytes(OUT_X_L, recvBytes, sizeof(recvBytes));
 	if (_ControlReg4.ble == BigEndian) {
-		dataPoint.setX((recvBytes[2] << 8) | recvBytes[1]);
-		dataPoint.setY((recvBytes[4] << 8) | recvBytes[3]);
-		dataPoint.setZ((recvBytes[6] << 8) | recvBytes[5]);
+		dataPoint.setX(((recvBytes[2] << 8) | recvBytes[1]) - _xOffset);
+		dataPoint.setY(((recvBytes[4] << 8) | recvBytes[3]) - _yOffset);
+		dataPoint.setZ(((recvBytes[6] << 8) | recvBytes[5]) - _zOffset);
 	} else {
-		dataPoint.setX((recvBytes[1] << 8) | recvBytes[2]);
-		dataPoint.setY((recvBytes[3] << 8) | recvBytes[4]);
-		dataPoint.setZ((recvBytes[5] << 8) | recvBytes[6]);
+		dataPoint.setX(((recvBytes[1] << 8) | recvBytes[2]) - _xOffset);
+		dataPoint.setY(((recvBytes[3] << 8) | recvBytes[4]) - _yOffset);
+		dataPoint.setZ(((recvBytes[5] << 8) | recvBytes[6]) - _zOffset);
 	}
 	return dataPoint;
 }
@@ -69,10 +70,16 @@ void L3G4200D::calculateOffset() {
 	// take 100 data points and average them
 	long sleepTime = getWaitTime(); 	// gets time to wait between reads depending on the output data rate
 	timespec sleepTimeSpec = { 0, sleepTime };
-
-
-
-
+	int numPoints = 100;
+	DataPoint points[numPoints];
+	for (int i = 0; i < numPoints; i++) {
+		points[i] = getSensorData();
+		nanosleep(&sleepTimeSpec, NULL);
+	}
+	DataPoint avg = DataPoint::average(points, numPoints);
+	this->_xOffset = avg.getX();
+	this->_yOffset = avg.getY();
+	this->_zOffset = avg.getZ();
 }
 long L3G4200D::getWaitTime() {
 	double time = (1 / DATA_RATE_VAL[_ControlReg1.rate]) * 1000000000;

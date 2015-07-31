@@ -14,13 +14,14 @@
 
 class DataPoint {
 private:
-	long x, y, z;
-	double  xf, yf, zf;
+	long x = 0, y = 0, z = 0;
+	double  xf = 0, yf = 0, zf = 0;
 	double dataFormatMult;
 public:
 
 	DataPoint operator -(const DataPoint& p);
 	DataPoint operator +(const DataPoint& p);
+	DataPoint operator /(const double);
 
 	static DataPoint average(DataPoint* points, unsigned int length);
 	static DataPoint copyFormatFrom(DataPoint point);

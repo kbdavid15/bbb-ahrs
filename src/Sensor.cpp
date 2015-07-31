@@ -16,13 +16,6 @@ Sensor::~Sensor() {
 }
 
 Sensor::Sensor() {
-//	_x = 0;
-//	_y = 0;
-//	_z = 0;
-//	_xf = 0;
-//	_yf = 0;
-//	_zf = 0;
-//	_dataFormatMultiplier = 0;
 	_xTrapLast = 0;
 	_yTrapLast = 0;
 	_zTrapLast = 0;
@@ -36,4 +29,10 @@ double Sensor::trapX(long uTs) {
 //	_xTrapLast = (_xTrapLast) + (1/(2*(double)fs)) * (_xLast + _x);
 	_xTrapLast = (_xTrapLast) + (Ts/2.0) * (_xfLast + dataPoint.getXf());
 	return _xTrapLast;
+}
+
+double Sensor::trapZ(long uTs) {
+	double Ts = uTs / 1000000.0;
+	_zTrapLast = (_zTrapLast) + Ts * (lastDataPoint.getZf() + dataPoint.getZf());
+	return _zTrapLast;
 }

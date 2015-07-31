@@ -158,7 +158,7 @@ public:
 	class Gain {
 		//TODO: Convert to nested class instead of struct
 	private:
-		GainIdx	gIdx;
+		GainIdx	currentGain;
 		GainIdx	prevGain;
 		bool 	updateFlag;
 		void init();
@@ -171,12 +171,12 @@ public:
 
 		GainIdx incrementIdx();
 
-		GainIdx getIdx() const {
-			return gIdx;
+		GainIdx getGainIdx() const {
+			return currentGain;
 		}
 
-		void setIdx(GainIdx idx) {
-			gIdx = idx;
+		void setGainIdx(GainIdx idx) {
+			currentGain = idx;
 		}
 
 		GainIdx getPrevGain() const {
@@ -208,7 +208,6 @@ public:
 	void setConfigRegB(GainIdx gain);
 	OperatingMode getModeRegister();
 	void setModeRegister(OperatingMode mode);
-//	Data getDataReadyXYZ(uint16_t timeout = 100);	//blocking function, returns data when it's ready
 	Status getStatus();
 	bool runSelfTest();
 	void dumpAllRegisters(unsigned char * regData, unsigned char len);

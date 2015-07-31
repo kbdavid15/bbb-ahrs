@@ -21,12 +21,8 @@ private:
 	double _xfLast, _yfLast, _zfLast;
 	double _xTrapLast, _yTrapLast, _zTrapLast;
 	DataPoint lastDataPoint;
-//	int16_t _x, _y, _z;
-//	double 	_xf, _yf, _zf;
-//	double _dataFormatMultiplier;	// updated whenever the scale sensitivity is changed
 public:
 	DataPoint dataPoint;
-	// getters and setters
 	virtual ~Sensor();
 	Sensor();
 	/**
@@ -35,6 +31,7 @@ public:
 	 * @return
 	 */
 	double trapX(long);	// trapezoidal integral
+	double trapZ(long);	// trapezoidal integral
 	virtual DataPoint getSensorData()=0;	// must be defined in implementation class
 
 	const std::deque<double>& getXQ() const {
@@ -47,6 +44,14 @@ public:
 
 	const std::deque<double>& getZQ() const {
 		return _zQ;
+	}
+
+	const DataPoint& getLastDataPoint() const {
+		return lastDataPoint;
+	}
+
+	void setLastDataPoint(const DataPoint& lastDataPoint) {
+		this->lastDataPoint = lastDataPoint;
 	}
 };
 

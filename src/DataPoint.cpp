@@ -24,13 +24,21 @@ DataPoint DataPoint::operator +(const DataPoint& p)  {
 	newData.setZ(z + p.z);
 	return newData;
 }
+// TODO: Limitation of integer division
+DataPoint DataPoint::operator /(const double num)  {
+	DataPoint newData = copyFormatFrom(*this);
+	newData.setX(x / num);
+	newData.setY(y / num);
+	newData.setZ(z / num);
+	return newData;
+}
 
 DataPoint DataPoint::average(DataPoint* points, unsigned int length) {
-	DataPoint totalPoint;
+	DataPoint totalPoint = copyFormatFrom(points[0]);
 	for (unsigned int i = 0; i < length; i++) {
 		totalPoint = totalPoint + points[i];
 	}
-	return totalPoint;
+	return totalPoint/length;
 }
 
 DataPoint DataPoint::copyFormatFrom(DataPoint point) {

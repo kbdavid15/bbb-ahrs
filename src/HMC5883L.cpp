@@ -73,19 +73,6 @@ void HMC5883L::setModeRegister(OperatingMode mode) {
 	device.writeByte(HMC_MODE_REG, mode);
 }
 
-//Data HMC5883L::getDataReadyXYZ(uint16_t timeout) {
-//	uint16_t counter = 0;
-//	while (!getStatus().DataReady) {
-//		if (counter >= timeout) {
-//			cout << "Error: Timeout in getDataReadyXYZ()" << endl;
-//			break;
-//		}
-//		counter++;
-//		usleep(1000);
-//	}
-//
-//	return getDataXYZ();
-//}
 Status HMC5883L::getStatus() {
 	unsigned char statusReg = device.readByte(HMC_STATUS_REG);
 	Status status;
@@ -144,20 +131,22 @@ void HMC5883L::dumpAllRegisters(unsigned char* regData, unsigned char len) {
 	cout << endl;
 }
 DataPoint HMC5883L::getSensorData() {
-	uint8_t recvBytes[6];
-	device.readBytes(HMC_DATA_2B_START_X, recvBytes, sizeof(recvBytes));
-	dataPoint.setX((recvBytes[0] << 8) + (recvBytes[1]));
-	dataPoint.setZ((recvBytes[2] << 8) + (recvBytes[3]));
-	dataPoint.setY((recvBytes[4] << 8) + (recvBytes[5]));
 	GainIdx dataGain;
 	if (_gain.isUpdateFlag()) {
 		// use previous gain
 		dataGain = _gain.getPrevGain();
 		_gain.setUpdateFlag(false);
 	} else {
-		dataGain = _gain.getIdx();
+		dataGain = _gain.getGainIdx();
 	}
 	dataPoint.setFormatMultiplier(1.0/LSB_PER_GAUSS[dataGain]);
+	setLastDataPoint(dataPoint);
+
+	uint8_t recvBytes[6];
+	device.readBytes(HMC_DATA_2B_START_X, recvBytes, sizeof(recvBytes));
+	dataPoint.setX((recvBytes[0] << 8) + (recvBytes[1]));
+	dataPoint.setZ((recvBytes[2] << 8) + (recvBytes[3]));
+	dataPoint.setY((recvBytes[4] << 8) + (recvBytes[5]));
 	return dataPoint;
 }
 double HMC5883L::getHeadingDeg(){
@@ -177,10 +166,10 @@ double HMC5883L::getHeadingDeg(){
 }
 
 unsigned char HMC5883L::Gain::getConfigRegB() {
-	return (gIdx << GAIN_BIT_OFFSET);
+	return (currentGain << GAIN_BIT_OFFSET);
 }
 HMC5883L::Gain::Gain(GainIdx idx) {
-	gIdx = idx;
+	currentGain = idx;
 	prevGain = idx;
 	updateFlag = true;
 }
@@ -188,22 +177,22 @@ HMC5883L::Gain::Gain() {
 	init();
 }
 void HMC5883L::Gain::updateIdx(GainIdx idx) {
-	if (idx != gIdx) {
-		prevGain = gIdx;
-		gIdx = idx;
+	if (idx != currentGain) {
+		prevGain = currentGain;
+		currentGain = idx;
 		updateFlag = true;
 	} else {
 		updateFlag = false;
 	}
 }
 void HMC5883L::Gain::init() {
-	gIdx = GAIN_1;	// default
+	currentGain = GAIN_1;	// default
 	prevGain = GAIN_1;
 	updateFlag = false;
 }
 GainIdx HMC5883L::Gain::incrementIdx() {
-	unsigned char i = (unsigned char)gIdx;
+	unsigned char i = (unsigned char)currentGain;
 	i++;
-	gIdx = (GainIdx)i;
-	return gIdx;
+	currentGain = (GainIdx)i;
+	return currentGain;
 }
