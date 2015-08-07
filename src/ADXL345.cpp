@@ -181,7 +181,7 @@ DataPoint ADXL345::getSensorData() {
 	spi.readBytes(DATAX0, recvBytes, sizeof(recvBytes));
 	dataPoint.setX((int)(recvBytes[2] << 8) | (int)recvBytes[1]);
 	dataPoint.setY((int)(recvBytes[4] << 8) | (int)recvBytes[3]);
-	dataPoint.setZ((int)(recvBytes[6] << 8) | (int)recvBytes[5]);
+	dataPoint.setZ(-((int)(recvBytes[6] << 8) | (int)recvBytes[5]));
 	return dataPoint;
 }
 // degrees
@@ -189,15 +189,17 @@ double ADXL345::getPitch() {
 	double x = dataPoint.getXf();
 	double y = dataPoint.getYf();
 	double z = dataPoint.getZf();
-	double value = atan(x/sqrt(pow(y,2) + pow(z,2)))*(180/PI);
-	return value;
+//	double value = atan(x/sqrt(pow(y,2) + pow(z,2)))*(180/PI);
+//	return value;
+	return (atan2(-x,sqrt(pow(y,2) + pow(z,2))) * (180/PI));
 }
 // degrees
 double ADXL345::getRoll() {
-	double x = dataPoint.getXf();
+//	double x = dataPoint.getXf();
 	double y = dataPoint.getYf();
 	double z = dataPoint.getZf();
 //	return atan(-x/z)*(180/PI);
-	double value = atan(y/sqrt(pow(x,2) + pow(z,2)))*(180/PI);
-	return value;
+//	double value = atan(y/sqrt(pow(x,2) + pow(z,2)))*(180/PI);
+//	return value;
+	return atan(y/z)* (180/PI);
 }

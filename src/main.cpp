@@ -55,8 +55,8 @@ int main() {
 
 	ADXL345 adx;
 	adx.startSelfTest();
-	//adx.resetOffset();
-	adx.calibrateOffset();
+	adx.resetOffset();
+	//adx.calibrateOffset();	issue with z axis calibration (COMPUNDING CALIBRATIONS, NEED TO RESET BEFORE CALCULATING)
 
 	DataFormat format;
 	format.fullRes = 1;
@@ -108,7 +108,7 @@ int main() {
 						(p.getYf() * sin(pitch) * sin(roll)) +
 						(p.getZf() * sin(pitch) * cos(roll));
 			double YH = (p.getYf() * cos(roll)) + (p.getZf() * sin(roll));
-			double yaw = atan2(-YH, XH) *(180/PI) ;
+			double yaw = atan2(-YH, XH) *(180/PI);
 
 			mFile << yaw << endl;
 
@@ -116,7 +116,7 @@ int main() {
 
 			updateDataFlag = false;
 		}
-		if (counter > 1000) break;
+		if (counter > 500) break;
 	}
 	mFile.close();
 
