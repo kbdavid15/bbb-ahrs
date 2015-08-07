@@ -32,6 +32,7 @@ public:
 	 */
 	double trapX(long);	// trapezoidal integral
 	double trapZ(long);	// trapezoidal integral
+	DataPoint getLPFData();
 	virtual DataPoint getSensorData()=0;	// must be defined in implementation class
 
 	const std::deque<double>& getXQ() const {

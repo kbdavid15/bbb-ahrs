@@ -184,16 +184,16 @@ DataPoint ADXL345::getSensorData() {
 	dataPoint.setZ(-((int)(recvBytes[6] << 8) | (int)recvBytes[5]));
 	return dataPoint;
 }
-// degrees
+// radians
 double ADXL345::getPitch() {
 	double x = dataPoint.getXf();
 	double y = dataPoint.getYf();
 	double z = dataPoint.getZf();
 //	double value = atan(x/sqrt(pow(y,2) + pow(z,2)))*(180/PI);
 //	return value;
-	return (atan2(-x,sqrt(pow(y,2) + pow(z,2))) * (180/PI));
+	return atan2(-x,sqrt(pow(y,2) + pow(z,2)));
 }
-// degrees
+// radians
 double ADXL345::getRoll() {
 //	double x = dataPoint.getXf();
 	double y = dataPoint.getYf();
@@ -201,5 +201,5 @@ double ADXL345::getRoll() {
 //	return atan(-x/z)*(180/PI);
 //	double value = atan(y/sqrt(pow(x,2) + pow(z,2)))*(180/PI);
 //	return value;
-	return atan(y/z)* (180/PI);
+	return atan(y/z);
 }

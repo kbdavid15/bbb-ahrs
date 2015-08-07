@@ -88,8 +88,8 @@ int main() {
 			mFile << p.toFile(false, ',') << ",";
 			double pitch = adx.getPitch();
 			double roll = adx.getRoll();
-			mFile << pitch << ",";
-			mFile << roll << ",";
+			mFile << pitch * (180/PI) << ",";
+			mFile << roll * (180/PI) << ",";
 			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";
 //			cout << p.toString(false) << endl;
 
@@ -108,7 +108,7 @@ int main() {
 						(p.getYf() * sin(pitch) * sin(roll)) +
 						(p.getZf() * sin(pitch) * cos(roll));
 			double YH = (p.getYf() * cos(roll)) + (p.getZf() * sin(roll));
-			double yaw = atan2(-YH, XH) *(180/PI);
+			double yaw = atan(-YH/XH) *(180/PI);	// why not atan2?
 
 			mFile << yaw << endl;
 
