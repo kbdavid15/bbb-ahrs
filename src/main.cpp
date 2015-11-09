@@ -68,7 +68,7 @@ int main() {
 	adx.setInterruptEnable(0x80);	// value of 0x80 enables DataReady bit
 	PwrDataRate odr(false, ODR_200); // set data rate to 100Hz
 	adx.setDataRate(odr);
-
+	adx.setLPF(0.5);
 	// wait 1.1ms + 1/ODR
 	struct timespec waitTime = adx.getInitWaitTime();
 	nanosleep(&waitTime, NULL);
@@ -85,6 +85,7 @@ int main() {
 		if (updateDataFlag)
 		{
 			DataPoint p = adx.getSensorData();
+			p = adx.getLPFData();
 			mFile << p.toFile(false, ',') << ",";
 			double pitch = adx.getPitch();
 			double roll = adx.getRoll();
@@ -108,7 +109,7 @@ int main() {
 						(p.getYf() * sin(pitch) * sin(roll)) +
 						(p.getZf() * sin(pitch) * cos(roll));
 			double YH = (p.getYf() * cos(roll)) + (p.getZf() * sin(roll));
-			double yaw = atan(-YH/XH) *(180/PI);	// why not atan2?
+			double yaw = atan(-YH/XH) * (180/PI);	// why not atan2?
 
 			mFile << yaw << endl;
 

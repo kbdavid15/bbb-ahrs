@@ -36,3 +36,12 @@ double Sensor::trapZ(long uTs) {
 	_zTrapLast = (_zTrapLast) + Ts * (lastDataPoint.getZf() + dataPoint.getZf());
 	return _zTrapLast;
 }
+
+DataPoint Sensor::getLPFData() {
+//	fXg = Xg * alpha + (fXg * (1.0 - alpha));
+	DataPoint p = DataPoint::copyFormatFrom(this->dataPoint);
+	p.setX(dataPoint.getX() * lpf + (lastDataPoint.getX() * (1.0 - lpf)));
+	p.setY(dataPoint.getY() * lpf + (lastDataPoint.getY() * (1.0 - lpf)));
+	p.setZ(dataPoint.getZ() * lpf + (lastDataPoint.getZ() * (1.0 - lpf)));
+	return p;
+}

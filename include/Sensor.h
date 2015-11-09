@@ -21,6 +21,7 @@ private:
 	double _xfLast, _yfLast, _zfLast;
 	double _xTrapLast, _yTrapLast, _zTrapLast;
 	DataPoint lastDataPoint;
+	double lpf = 1;	// default value of 1 means no filter
 public:
 	DataPoint dataPoint;
 	virtual ~Sensor();
@@ -34,6 +35,10 @@ public:
 	double trapZ(long);	// trapezoidal integral
 	DataPoint getLPFData();
 	virtual DataPoint getSensorData()=0;	// must be defined in implementation class
+
+	void setLPF(double alpha) {
+		this->lpf = alpha;
+	}
 
 	const std::deque<double>& getXQ() const {
 		return _xQ;

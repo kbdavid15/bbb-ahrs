@@ -17,7 +17,7 @@ private:
 	long x = 0, y = 0, z = 0;
 	double  xf = 0, yf = 0, zf = 0;
 	double dataFormatMult;
-	double lpf = 1;	// default value of 1 means no filter
+//	double lpf = 1;	// default value of 1 means no filter
 public:
 
 	DataPoint operator -(const DataPoint& p);
@@ -32,9 +32,7 @@ public:
 	std::string toString(bool rawData);
 	std::string toFile(bool rawData, char formatSpecifier);
 
-	void setLPF(double alpha) {
-		this->lpf = alpha;
-	}
+
 
 	int16_t getX() const {
 		return x;

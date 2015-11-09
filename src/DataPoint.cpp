@@ -80,5 +80,5 @@ string DataPoint::toString(bool rawData) {
 	return ss.str();
 }
 DataPoint DataPoint::filter(DataPoint& lastPoint) {
-
+	DataPoint p = copyFormatFrom(*this);
 }
