@@ -17,6 +17,7 @@
 #include <iostream>
 #include <string>
 #include <DataPoint.h>
+#include <hscan.h>
 #include <math.h>
 
 using namespace std;
@@ -78,6 +79,13 @@ int main() {
 	mFile << "AccelX,AccelY,AccelZ,Pitch,Roll,IntAccelX,GyroX,GyroY,GyroZ,IntGyroZ,MagX,MagY,MagZ,Heading,Yaw" << endl;
 
 	long counter = 0;
+
+	// send can frame
+	can mCan;
+	unsigned char test[] = { 'h', 'e', 'l', 'l', 'o', ' ', ' ', ' ' };
+	mCan.sendframe(0x513, 8, test);
+
+
 
 	// main program loop
 	while (true)
