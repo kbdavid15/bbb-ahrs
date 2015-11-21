@@ -7,6 +7,7 @@
 
 
 #include <hscan.h>
+#include <can-utils/include/linux/can/bcm.h>
 
 //can::can() {
 //
@@ -62,4 +63,37 @@ int can::sendframe(canid_t addr1, unsigned char len, unsigned char * data) {
 	close(s);
 
 	return 0;
+}
+
+void can::add_message(txmsg message) {
+	//messages.push_back(&msg);
+	int s;
+	struct sockaddr_can addr;
+	struct ifreq ifr;
+	struct {
+		  struct bcm_msg_head msg_head;
+		  struct can_frame frame;
+	} msg;
+
+	s = socket(PF_CAN, SOCK_DGRAM, CAN_BCM);
+	addr.can_family = AF_CAN;
+	strcpy(ifr.ifr_name, "can0");
+	ioctl(s, SIOCGIFINDEX, &ifr);
+	addr.can_ifindex = ifr.ifr_ifindex;
+
+	connect(s, (struct sockaddr *)&addr, sizeof(addr));
+
+	// set up the message
+	msg.msg_head.opcode = TX_SETUP;
+	msg.msg_head.can_id = message.arbid;
+	msg.msg_head.flags   = SETTIMER|STARTTIMER|TX_CP_CAN_ID;
+	msg.msg_head.nframes = 1;
+	msg.msg_head.count = 0;
+	msg.msg_head.ival1.tv_sec = 0;
+	msg.msg_head.ival1.tv_usec = 0;
+	msg.msg_head.ival2.tv_sec = 0;
+	msg.msg_head.ival2.tv_usec = message.period_ms * 1000;
+	msg.frame = message.frame;
+
+	write(s, &msg, sizeof(msg));
 }

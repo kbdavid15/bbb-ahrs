@@ -19,7 +19,7 @@
 #include <DataPoint.h>
 #include <hscan.h>
 #include <math.h>
-
+#include <can-utils/bcmserver.h>
 using namespace std;
 
 bool updateDataFlag = true;
@@ -30,6 +30,9 @@ void timer_handler(int signum) {
 }
 
 int main() {
+//	bcmserver server;
+//	char * testperiod[] = { "can0", "A", "1", "0", "123", "1", "FE"};
+//	server.messagecommand(7, testperiod);
 
 	struct sigaction sa;
 	struct itimerval timer;
@@ -83,9 +86,9 @@ int main() {
 	// send can frame
 	can mCan;
 	unsigned char test[] = { 'h', 'e', 'l', 'l', 'o', ' ', ' ', ' ' };
-	mCan.sendframe(0x513, 8, test);
-
-
+//	mCan.sendframe(0x513, 8, test);
+	txmsg devid(0x513, 8, test, 100);
+	mCan.add_message(devid);
 
 	// main program loop
 	while (true)
