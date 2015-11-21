@@ -31,12 +31,12 @@
 #ifndef BLACKLIB_H_
 #define BLACKLIB_H_
 
-#include "BlackCore.h"
+#include "../../src/BlackLib/BlackCore.h"
+#include "../../src/BlackLib/BlackGPIO/BlackGPIO.h"
+#include "../../src/BlackLib/BlackSPI/BlackSPI.h"
 #include "BlackADC/BlackADC.h"
 #include "BlackPWM/BlackPWM.h"
-#include "BlackGPIO/BlackGPIO.h"
 #include "BlackUART/BlackUART.h"
-#include "BlackSPI/BlackSPI.h"
 #include "BlackI2C/BlackI2C.h"
 #include "BlackDirectory/BlackDirectory.h"
 #include "BlackTime/BlackTime.h"

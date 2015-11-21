@@ -5,7 +5,8 @@
  *      Author: kbdavid15
  */
 
-#include <DataPoint.h>
+#include "DataPoint.h"
+
 #include <sstream>
 using namespace std;
 

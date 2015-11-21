@@ -43,7 +43,8 @@
  *
  */
 
-#include "canframelen.h"
+#include "../../src/can-utils/canframelen.h"
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>

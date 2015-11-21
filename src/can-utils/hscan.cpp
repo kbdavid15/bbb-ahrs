@@ -1,17 +1,19 @@
 /*
- * can.cpp
+ * hscan.cpp
  *
  *  Created on: Nov 19, 2015
  *      Author: kbdavid15
  */
 
+#include "hscan.h"
 
-#include <hscan.h>
-#include <can-utils/include/linux/can/bcm.h>
+#include <sys/socket.h>
+#include <linux/can/raw.h>
 
-//can::can() {
-//
-//}
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <cstdio>
+#include <cstring>
 
 int can::sendframe(canid_t addr1, unsigned char len, unsigned char * data) {
 	int s; /* can raw socket */
@@ -65,27 +67,26 @@ int can::sendframe(canid_t addr1, unsigned char len, unsigned char * data) {
 	return 0;
 }
 
-void can::add_message(txmsg message) {
-	//messages.push_back(&msg);
-	int s;
-	struct sockaddr_can addr;
-	struct ifreq ifr;
-	struct {
-		  struct bcm_msg_head msg_head;
-		  struct can_frame frame;
-	} msg;
+can::can() : can("can0") {}
 
-	s = socket(PF_CAN, SOCK_DGRAM, CAN_BCM);
+can::can(const char * interface) {
+	// initialize the interface
+	sock = socket(PF_CAN, SOCK_DGRAM, CAN_BCM);
 	addr.can_family = AF_CAN;
-	strcpy(ifr.ifr_name, "can0");
-	ioctl(s, SIOCGIFINDEX, &ifr);
+	strcpy(ifr.ifr_name, interface);
+	ioctl(sock, SIOCGIFINDEX, &ifr);
 	addr.can_ifindex = ifr.ifr_ifindex;
 
-	connect(s, (struct sockaddr *)&addr, sizeof(addr));
+	connect(sock, (struct sockaddr *)&addr, sizeof(addr));
+}
+
+bcm_message can::add_message(txmsg message) {
+	//messages.push_back(&msg);
+	struct bcm_message msg;
 
 	// set up the message
 	msg.msg_head.opcode = TX_SETUP;
-	msg.msg_head.can_id = message.arbid;
+	msg.msg_head.can_id = message.frame.can_id;
 	msg.msg_head.flags   = SETTIMER|STARTTIMER|TX_CP_CAN_ID;
 	msg.msg_head.nframes = 1;
 	msg.msg_head.count = 0;
@@ -95,5 +96,12 @@ void can::add_message(txmsg message) {
 	msg.msg_head.ival2.tv_usec = message.period_ms * 1000;
 	msg.frame = message.frame;
 
-	write(s, &msg, sizeof(msg));
+	write(sock, &msg, sizeof(msg));
+
+	return msg;
+}
+
+void can::update_message(bcm_message msg) {
+	msg.msg_head.flags = 0;
+	write(sock, &msg, sizeof(msg));
 }

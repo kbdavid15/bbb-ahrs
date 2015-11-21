@@ -5,7 +5,8 @@
  *      Author: kbdavid15
  */
 
-#include "../include/HMC5883L.h"
+#include "HMC5883L.h"
+
 #include <iostream>
 
 using namespace std;

@@ -31,7 +31,7 @@
 
 
 
-#include "BlackSPI.h"
+#include "../../../src/BlackLib/BlackSPI/BlackSPI.h"
 
 namespace BlackLib
 {

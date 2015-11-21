@@ -6,9 +6,7 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-#include <ADXL345.h>
-#include <HMC5883L.h>
-#include <L3G4200D.h>
+#include <math.h>
 #include <signal.h>
 #include <sys/time.h>
 #include <cstring>
@@ -16,10 +14,15 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <DataPoint.h>
-#include <hscan.h>
-#include <math.h>
-#include <can-utils/bcmserver.h>
+
+#include "ADXL345.h"
+#include "can-utils/hscan.h"
+#include "can-utils/txmsg.h"
+#include "DataPoint.h"
+#include "HMC5883L.h"
+#include "L3G4200D.h"
+#include "Sensor.h"
+
 using namespace std;
 
 bool updateDataFlag = true;
@@ -88,7 +91,7 @@ int main() {
 	unsigned char test[] = { 'h', 'e', 'l', 'l', 'o', ' ', ' ', ' ' };
 //	mCan.sendframe(0x513, 8, test);
 	txmsg devid(0x513, 8, test, 100);
-	mCan.add_message(devid);
+	bcm_message can_device_id = mCan.add_message(devid);
 
 	// main program loop
 	while (true)
@@ -129,6 +132,10 @@ int main() {
 			updateDataFlag = false;
 		}
 		if (counter > 500) break;
+		if (counter == 250) {
+			can_device_id.frame.data[6] = 'w';
+			mCan.update_message(can_device_id);
+		}
 	}
 	mFile.close();
 

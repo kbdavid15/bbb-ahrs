@@ -30,10 +30,9 @@
 #ifndef BLACKGPIO_H_
 #define BLACKGPIO_H_
 
-#include "../BlackCore.h"
-
 #include <fstream>
 #include <string>
+#include "../../../src/BlackLib/BlackCore.h"
 
 
 

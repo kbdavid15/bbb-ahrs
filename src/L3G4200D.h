@@ -39,10 +39,10 @@
 #define INT1_TSH_ZL 	0x37
 #define INT1_DURATION	0x38
 
-#include <MySpi.h>
+#include "../src/MySpi.h"
 #include <string>
 #include <sstream>
-#include <Sensor.h>
+#include "../src/Sensor.h"
 
 using namespace std;
 using namespace BlackLib;

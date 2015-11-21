@@ -27,7 +27,7 @@
 
  */
 
-#include "BlackCore.h"
+#include "../../src/BlackLib/BlackCore.h"
 
 
 

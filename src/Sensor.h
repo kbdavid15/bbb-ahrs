@@ -12,7 +12,8 @@
 #include <sstream>
 //#include <queue>
 #include <deque>
-#include <DataPoint.h>
+
+#include "../src/DataPoint.h"
 
 class Sensor {
 private:

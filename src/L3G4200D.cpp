@@ -5,7 +5,8 @@
  *      Author: kbdavid15
  */
 
-#include "../include/L3G4200D.h"
+#include "L3G4200D.h"
+
 #include <iostream>
 
 using namespace std;

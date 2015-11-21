@@ -35,8 +35,6 @@
 #define BLACKSPI_H_
 
 
-#include "../BlackCore.h"
-
 #include <cstring>
 #include <string>
 #include <fstream>
@@ -46,6 +44,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>
+#include "../../../src/BlackLib/BlackCore.h"
 
 
 using std::string;

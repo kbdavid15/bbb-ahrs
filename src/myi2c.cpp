@@ -5,7 +5,7 @@
 // Copyright   : Your copyright notice
 // Description : Hello World in C++, Ansi-style
 //============================================================================
-#include "../include/myi2c.h"
+#include "myi2c.h"
 
 #include <iostream>
 using namespace std;

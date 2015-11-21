@@ -5,10 +5,11 @@
  *      Author: kbdavid15
  */
 
-#include <ADXL345.h>
-#include <BlackLib/BlackSPI/BlackSPI.h>
+#include "ADXL345.h"
+
 #include <iostream>
 #include <math.h>
+#include "BlackLib/BlackSPI/BlackSPI.h"
 
 #ifndef PI
 #define PI				3.14159265359

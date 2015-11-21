@@ -52,10 +52,10 @@
 #define SELF_TEST_MIN_Z_16	10
 #define SELF_TEST_MAX_Z_16	110
 
-#include <MySpi.h>
+#include "../src/MySpi.h"
 #include <string>
 #include <sstream>
-#include <Sensor.h>
+#include "../src/Sensor.h"
 
 /*
 +----------+---------+------------+
