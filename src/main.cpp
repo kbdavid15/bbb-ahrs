@@ -22,6 +22,7 @@
 #include "HMC5883L.h"
 #include "L3G4200D.h"
 #include "Sensor.h"
+#include "can-utils/BodyAccelMessage.h"
 
 using namespace std;
 
@@ -88,10 +89,10 @@ int main() {
 
 	// send can frame
 	can mCan;
-	unsigned char test[] = { 'h', 'e', 'l', 'l', 'o', ' ', ' ', ' ' };
-//	mCan.sendframe(0x513, 8, test);
-	txmsg devid(0x513, 8, test, 100);
-	bcm_message can_device_id = mCan.add_message(devid);
+	const char * bbb_ahrs_id = "BBB-AHRS";
+	mCan.add_message(0x513, 50000, 8, (unsigned char *)bbb_ahrs_id);
+	BodyAccelMessage body;
+	bcm_message body_accel = mCan.add_message(body.getFrame(), body.period_ms);
 
 	// main program loop
 	while (true)
@@ -100,6 +101,14 @@ int main() {
 		{
 			DataPoint p = adx.getSensorData();
 			p = adx.getLPFData();
+
+			// update body acceleration can message
+			body.x_acceleration = p.getXf() / 0.01;
+			body.y_acceleration = p.getYf() / 0.01;
+			body.z_acceleration = p.getZf() / 0.01;
+			body_accel.frame = body.getFrame();
+			mCan.update_message(body_accel);
+
 			mFile << p.toFile(false, ',') << ",";
 			double pitch = adx.getPitch();
 			double roll = adx.getRoll();
@@ -131,11 +140,7 @@ int main() {
 
 			updateDataFlag = false;
 		}
-		if (counter > 500) break;
-		if (counter == 250) {
-			can_device_id.frame.data[6] = 'w';
-			mCan.update_message(can_device_id);
-		}
+//		if (counter > 500) break;
 	}
 	mFile.close();
 
