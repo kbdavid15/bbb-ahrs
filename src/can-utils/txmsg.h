@@ -23,17 +23,20 @@ struct bcm_message {
 };
 
 class txmsg {
-private:
+protected:
 	struct bcm_message msg;
 public:
 	uint32_t  period_ms;
 	txmsg();
 	virtual ~txmsg();
-//	txmsg(can_frame, uint32_t);
-//	txmsg(canid_t addr1, unsigned char len, unsigned char * data, uint32_t period);
 	virtual can_frame getFrame() = 0;
-	bcm_message * get_bcm_msg() {
-		return &msg;
+
+	const struct bcm_message& getMsg() const {
+		return msg;
+	}
+
+	void setMsg(const struct bcm_message& msg) {
+		this->msg = msg;
 	}
 };
 

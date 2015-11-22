@@ -23,6 +23,7 @@
 #include "L3G4200D.h"
 #include "Sensor.h"
 #include "can-utils/BodyAccelMessage.h"
+#include "can-utils/AngularRateMessage.h"
 
 using namespace std;
 
@@ -34,10 +35,6 @@ void timer_handler(int signum) {
 }
 
 int main() {
-//	bcmserver server;
-//	char * testperiod[] = { "can0", "A", "1", "0", "123", "1", "FE"};
-//	server.messagecommand(7, testperiod);
-
 	struct sigaction sa;
 	struct itimerval timer;
 	memset ( &sa, 0, sizeof ( sa ) );
@@ -64,7 +61,7 @@ int main() {
 	ADXL345 adx;
 	adx.startSelfTest();
 	adx.resetOffset();
-	//adx.calibrateOffset();	issue with z axis calibration (COMPUNDING CALIBRATIONS, NEED TO RESET BEFORE CALCULATING)
+	//adx.calibrateOffset();	issue with z axis calibration (COMPOUNDING CALIBRATIONS, NEED TO RESET BEFORE CALCULATING)
 
 	DataFormat format;
 	format.fullRes = 1;
@@ -88,11 +85,13 @@ int main() {
 	long counter = 0;
 
 	// send can frame
-	can mCan;
+	can mcan;
 	const char * bbb_ahrs_id = "BBB-AHRS";
-	mCan.add_message(0x513, 50000, 8, (unsigned char *)bbb_ahrs_id);
+	mcan.add_message(0x513, 5000, 8, (unsigned char *)bbb_ahrs_id);
 	BodyAccelMessage body;
-	bcm_message body_accel = mCan.add_message(body.getFrame(), body.period_ms);
+	AngularRateMessage ang_rate;
+	mcan.add_message(&body);
+	mcan.add_message(&ang_rate);
 
 	// main program loop
 	while (true)
@@ -103,11 +102,8 @@ int main() {
 			p = adx.getLPFData();
 
 			// update body acceleration can message
-			body.x_acceleration = p.getXf() / 0.01;
-			body.y_acceleration = p.getYf() / 0.01;
-			body.z_acceleration = p.getZf() / 0.01;
-			body_accel.frame = body.getFrame();
-			mCan.update_message(body_accel);
+			body.updateFrame(p);
+			mcan.update_message(&body);
 
 			mFile << p.toFile(false, ',') << ",";
 			double pitch = adx.getPitch();
@@ -122,10 +118,15 @@ int main() {
 			mFile << p.toFile(false, ',') << ",";
 			mFile << l3g.trapZ(SAMPLE_RATE_uS) << ",";
 
+			// update angular acceleration can message
+			ang_rate.updateFrame(p);
+			mcan.update_message(&ang_rate);
+
 			p = hmc.getSensorData();
 //			cout << p.toString(false) << endl;
 			mFile << p.toFile(false, ',') << ",";
-			mFile << hmc.getHeadingDeg() << ",";
+			double heading = hmc.getHeadingDeg();
+			mFile << heading << ",";
 
 			// calculate yaw rate
 			double XH = (p.getXf() * cos(pitch)) +
