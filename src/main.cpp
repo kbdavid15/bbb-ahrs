@@ -24,6 +24,7 @@
 #include "Sensor.h"
 #include "can-utils/BodyAccelMessage.h"
 #include "can-utils/AngularRateMessage.h"
+#include "MadgwickAHRS/MadgwickAHRS.h"
 
 using namespace std;
 
@@ -98,14 +99,14 @@ int main() {
 	{
 		if (updateDataFlag)
 		{
-			DataPoint p = adx.getSensorData();
-			p = adx.getLPFData();
+			DataPoint accelp = adx.getSensorData();
+			accelp = adx.getLPFData();
 
 			// update body acceleration can message
-			body.updateFrame(p);
+			body.updateFrame(accelp);
 			mcan.update_message(&body);
 
-			mFile << p.toFile(false, ',') << ",";
+			mFile << accelp.toFile(false, ',') << ",";
 			double pitch = adx.getPitch();
 			double roll = adx.getRoll();
 			mFile << pitch * (180/PI) << ",";
@@ -113,29 +114,31 @@ int main() {
 			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";
 //			cout << p.toString(false) << endl;
 
-			p = l3g.getSensorData();
-			cout << p.toString(false) << endl;
-			mFile << p.toFile(false, ',') << ",";
+			DataPoint gyrop = l3g.getSensorData();
+			cout << gyrop.toString(false) << endl;
+			mFile << gyrop.toFile(false, ',') << ",";
 			mFile << l3g.trapZ(SAMPLE_RATE_uS) << ",";
 
 			// update angular acceleration can message
-			ang_rate.updateFrame(p);
+			ang_rate.updateFrame(gyrop);
 			mcan.update_message(&ang_rate);
 
-			p = hmc.getSensorData();
+			DataPoint magp = hmc.getSensorData();
 //			cout << p.toString(false) << endl;
-			mFile << p.toFile(false, ',') << ",";
+			mFile << magp.toFile(false, ',') << ",";
 			double heading = hmc.getHeadingDeg();
 			mFile << heading << ",";
 
 			// calculate yaw rate
-			double XH = (p.getXf() * cos(pitch)) +
-						(p.getYf() * sin(pitch) * sin(roll)) +
-						(p.getZf() * sin(pitch) * cos(roll));
-			double YH = (p.getYf() * cos(roll)) + (p.getZf() * sin(roll));
+			double XH = (magp.getXf() * cos(pitch)) +
+						(magp.getYf() * sin(pitch) * sin(roll)) +
+						(magp.getZf() * sin(pitch) * cos(roll));
+			double YH = (magp.getYf() * cos(roll)) + (magp.getZf() * sin(roll));
 			double yaw = atan(-YH/XH) * (180/PI);	// why not atan2?
 
 			mFile << yaw << endl;
+
+			// update MadgwickAHRS
 
 			counter++;
 
