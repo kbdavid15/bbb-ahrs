@@ -24,7 +24,9 @@
 #include "Sensor.h"
 #include "can-utils/BodyAccelMessage.h"
 #include "can-utils/AngularRateMessage.h"
-#include "MadgwickAHRS/MadgwickAHRS.h"
+extern "C" {
+	#include "MadgwickAHRS/MadgwickAHRS.h"
+}
 
 using namespace std;
 
@@ -81,7 +83,7 @@ int main() {
 
 	ofstream mFile;
 	mFile.open("acceldata.csv", ios::out);
-	mFile << "AccelX,AccelY,AccelZ,Pitch,Roll,IntAccelX,GyroX,GyroY,GyroZ,IntGyroZ,MagX,MagY,MagZ,Heading,Yaw" << endl;
+	mFile << "AccelX,AccelY,AccelZ,Pitch,Roll,IntAccelX,GyroX,GyroY,GyroZ,IntGyroZ,MagX,MagY,MagZ,Heading,Yaw,MadPitch,MadRoll,MadHeading" << endl;
 
 	long counter = 0;
 
@@ -115,7 +117,7 @@ int main() {
 //			cout << p.toString(false) << endl;
 
 			DataPoint gyrop = l3g.getSensorData();
-			cout << gyrop.toString(false) << endl;
+//			cout << gyrop.toString(false) << endl;
 			mFile << gyrop.toFile(false, ',') << ",";
 			mFile << l3g.trapZ(SAMPLE_RATE_uS) << ",";
 
@@ -136,12 +138,26 @@ int main() {
 			double YH = (magp.getYf() * cos(roll)) + (magp.getZf() * sin(roll));
 			double yaw = atan(-YH/XH) * (180/PI);	// why not atan2?
 
-			mFile << yaw << endl;
+			mFile << yaw << ",";
 
 			// update MadgwickAHRS
+			DataPoint g_rad = gyrop * (PI/180);
+			MadgwickAHRSupdate(g_rad.getXf(), g_rad.getYf(), g_rad.getZf(),
+					accelp.getXf(), accelp.getYf(), accelp.getZf(),
+					magp.getXf(), magp.getYf(), magp.getZf());
+			float MadPitch = atan2(2*q1*q2 - 2*q0*q3, 2*q0*q0 + 2*q1*q1 - 1);
+			float MadRoll = -asin(2*q1*q3 + 2*q0*q2);
+			float MadHeading = atan2(2*q2*q3 - 2*q0*q2, 2*q0*q0 + 2*q3*q3 - 1);
+			mFile << MadPitch << ",";
+			mFile << MadRoll << ",";
+			mFile << MadHeading << ",";
 
+			cout << "Pitch: " << MadPitch << "\t";
+			cout << "Roll: " << MadRoll << "\t";
+			cout << "Heading: " << MadHeading << endl;
+
+			mFile << endl;
 			counter++;
-
 			updateDataFlag = false;
 		}
 //		if (counter > 500) break;

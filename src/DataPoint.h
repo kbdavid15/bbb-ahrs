@@ -15,7 +15,7 @@
 class DataPoint {
 private:
 	long x = 0, y = 0, z = 0;
-	double  xf = 0, yf = 0, zf = 0;
+	float  xf = 0, yf = 0, zf = 0;
 	double dataFormatMult;
 //	double lpf = 1;	// default value of 1 means no filter
 public:
@@ -23,6 +23,7 @@ public:
 	DataPoint operator -(const DataPoint& p);
 	DataPoint operator +(const DataPoint& p);
 	DataPoint operator /(const double);
+	DataPoint operator *(const double);
 
 	static DataPoint average(DataPoint* points, unsigned int length);
 	static DataPoint copyFormatFrom(DataPoint point);
@@ -41,7 +42,7 @@ public:
 		this->x = x;
 		this->xf = x * dataFormatMult;
 	}
-	double getXf() const {
+	float getXf() const {
 		return xf;
 	}
 	int16_t getY() const {
@@ -51,7 +52,7 @@ public:
 		this->y = y;
 		this->yf = y * dataFormatMult;
 	}
-	double getYf() const {
+	float getYf() const {
 		return yf;
 	}
 	int16_t getZ() const {
@@ -61,7 +62,7 @@ public:
 		this->z = z;
 		this->zf = z * dataFormatMult;
 	}
-	double getZf() const {
+	float getZf() const {
 		return zf;
 	}
 

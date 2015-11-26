@@ -33,7 +33,13 @@ DataPoint DataPoint::operator /(const double num)  {
 	newData.setZ(z / num);
 	return newData;
 }
-
+DataPoint DataPoint::operator *(const double num)  {
+	DataPoint newData = copyFormatFrom(*this);
+	newData.setX(x * num);
+	newData.setY(y * num);
+	newData.setZ(z * num);
+	return newData;
+}
 DataPoint DataPoint::average(DataPoint* points, unsigned int length) {
 	DataPoint totalPoint = copyFormatFrom(points[0]);
 	for (unsigned int i = 0; i < length; i++) {
