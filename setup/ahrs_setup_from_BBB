@@ -1,0 +1,4 @@
+#! /bin/bash
+dtc -O dtb -o BBB-AHRS-00A0.dtbo -b 0 -@ BBB-AHRS-00A0.dts
+cp -r BBB-AHRS-00A0.dtbo /lib/firmware
+rm -rf BBB-AHRS*
