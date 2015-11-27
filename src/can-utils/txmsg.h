@@ -29,7 +29,7 @@ public:
 	uint32_t  period_ms;
 	txmsg();
 	virtual ~txmsg();
-	virtual can_frame getFrame() = 0;
+	virtual void updateFrameData() = 0;
 
 	const struct bcm_message& getMsg() const {
 		return msg;
@@ -39,9 +39,5 @@ public:
 		this->msg = msg;
 	}
 };
-
-
-
-
 
 #endif /* TXMSG_H_ */

@@ -34,30 +34,23 @@ void AngularRateMessage::init(long period) {
 		msg.msg_head.ival2.tv_sec = 0;
 		msg.msg_head.ival2.tv_usec = period * 1000;
 	}
-	msg.frame = getFrame();
+	msg.frame.can_dlc = 6;
+	msg.frame.can_id  = ARBID_ANGULAR_RATE;
+	updateFrameData();
 }
 
 AngularRateMessage::~AngularRateMessage() {
 	// TODO Auto-generated destructor stub
 }
 
-can_frame AngularRateMessage::getFrame() {
-	struct can_frame frame;
-	frame.can_dlc = 6;
-	frame.can_id  = ARBID_ANGULAR_RATE;
-	frame.data[0] = x_angular_rate >> 8;
-	frame.data[1] = x_angular_rate & 0xFF;
-	frame.data[2] = y_angular_rate >> 8;
-	frame.data[3] = y_angular_rate & 0xFF;
-	frame.data[4] = z_angular_rate >> 8;
-	frame.data[5] = z_angular_rate & 0xFF;
-	return frame;
-}
-
 void AngularRateMessage::updateFrame(DataPoint p) {
 	x_angular_rate = p.getXf() / 0.01;
 	y_angular_rate = p.getYf() / 0.01;
 	z_angular_rate = p.getZf() / 0.01;
+	updateFrameData();
+}
+
+void AngularRateMessage::updateFrameData() {
 	msg.frame.data[0] = x_angular_rate >> 8;
 	msg.frame.data[1] = x_angular_rate & 0xFF;
 	msg.frame.data[2] = y_angular_rate >> 8;

@@ -17,7 +17,7 @@ const double L3G4200D::DATA_RATE_VAL[] = { 100, 200, 400, 800};
 L3G4200D::L3G4200D():spi(BlackLib::SPI1_0, 8, BlackLib::SpiMode3, 2400000) {
 	// set up control registers
 	setControlReg4((CR4) { true, BigEndian, ST_Disabled, Scale250, SpiMode4Wire});
-	setControlReg1((CR1) { ODR_200Hz, BW_1, true, true, true, true });
+	setControlReg1((CR1) { ODR_100Hz, BW_1, true, true, true, true });
 }
 
 L3G4200D::~L3G4200D() {

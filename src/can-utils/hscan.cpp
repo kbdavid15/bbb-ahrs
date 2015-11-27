@@ -27,12 +27,10 @@ can::can(const char * interface) {
 	connect(bcm_socket, (struct sockaddr *)&addr, sizeof(addr));
 }
 
-bcm_message can::add_message(txmsg * message) {
+void can::add_message(bcm_message msg) {
 	// set up the message
-	bcm_message msg = message->getMsg();
 	msg.msg_head.flags = SETTIMER | STARTTIMER;
 	write(bcm_socket, &msg, sizeof(msg));
-	return msg;
 }
 
 bcm_message can::add_message(canid_t addr, long period, unsigned char len,
@@ -43,8 +41,6 @@ bcm_message can::add_message(canid_t addr, long period, unsigned char len,
 	msg.msg_head.flags = SETTIMER | STARTTIMER | TX_CP_CAN_ID;
 	msg.msg_head.nframes = 1;
 	msg.msg_head.count = 0;
-	msg.msg_head.ival1.tv_sec = 0;
-	msg.msg_head.ival1.tv_usec = 0;
 	if (period > 1000) { // 1 second
 			msg.msg_head.ival2.tv_sec = period / 1000;
 			msg.msg_head.ival2.tv_usec = (period % 1000) * 1000;
@@ -53,11 +49,9 @@ bcm_message can::add_message(canid_t addr, long period, unsigned char len,
 		msg.msg_head.ival2.tv_usec = period * 1000;
 	}
 	msg.frame.can_dlc = len;
-
 	for (int i = 0; i < len; i ++) {
 		msg.frame.data[i]= data[i];
 	}
-
 	write(bcm_socket, &msg, sizeof(msg));
 	return msg;
 }
@@ -69,8 +63,6 @@ bcm_message can::add_message(can_frame frame, long period) {
 	msg.msg_head.flags = SETTIMER | STARTTIMER | TX_CP_CAN_ID;
 	msg.msg_head.nframes = 1;
 	msg.msg_head.count = 0;
-	msg.msg_head.ival1.tv_sec = 0;
-	msg.msg_head.ival1.tv_usec = 0;
 	if (period > 1000) { // 1 second
 		msg.msg_head.ival2.tv_sec = period / 1000;
 		msg.msg_head.ival2.tv_usec = (period % 1000) * 1000;
@@ -84,12 +76,6 @@ bcm_message can::add_message(can_frame frame, long period) {
 }
 
 void can::update_message(bcm_message msg) {
-	msg.msg_head.flags &= ~(SETTIMER | STARTTIMER);
-	write(bcm_socket, &msg, sizeof(msg));
-}
-
-void can::update_message(txmsg * message) {
-	bcm_message msg = message->getMsg();
-	msg.msg_head.flags &= ~(SETTIMER | STARTTIMER);
+	msg.msg_head.flags = 0;
 	write(bcm_socket, &msg, sizeof(msg));
 }

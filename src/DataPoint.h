@@ -42,7 +42,7 @@ public:
 		this->x = x;
 		this->xf = x * dataFormatMult;
 	}
-	float getXf() const {
+	float getXf() {
 		return xf;
 	}
 	int16_t getY() const {
@@ -52,7 +52,7 @@ public:
 		this->y = y;
 		this->yf = y * dataFormatMult;
 	}
-	float getYf() const {
+	float getYf() {
 		return yf;
 	}
 	int16_t getZ() const {
@@ -62,7 +62,7 @@ public:
 		this->z = z;
 		this->zf = z * dataFormatMult;
 	}
-	float getZf() const {
+	float getZf() {
 		return zf;
 	}
 

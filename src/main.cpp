@@ -31,7 +31,7 @@ extern "C" {
 using namespace std;
 
 bool updateDataFlag = true;
-const long SAMPLE_RATE_uS = 5000;
+const long SAMPLE_RATE_uS = 10000;	// 10ms for 100Hz
 
 void timer_handler(int signum) {
 	updateDataFlag = true;
@@ -72,9 +72,9 @@ int main() {
 	format.justify = 0;
 	adx.setDataFormat(format);	// value of 0x0B sets full resolution mode and range to +/- 16g
 	adx.setPowerCtrl(0x08);		// value of 0x08 enables measurement mode
-	//adx.setInterruptEnable(0x00);	// disables interrupts
-	adx.setInterruptEnable(0x80);	// value of 0x80 enables DataReady bit
-	PwrDataRate odr(false, ODR_200); // set data rate to 100Hz
+	adx.setInterruptEnable(0x00);	// disables interrupts
+//	adx.setInterruptEnable(0x80);	// value of 0x80 enables DataReady bit
+	PwrDataRate odr(false, ODR_100); // set data rate to 100Hz
 	adx.setDataRate(odr);
 	adx.setLPF(0.5);
 	// wait 1.1ms + 1/ODR
@@ -91,10 +91,10 @@ int main() {
 	can mcan;
 	const char * bbb_ahrs_id = "BBB-AHRS";
 	mcan.add_message(0x513, 5000, 8, (unsigned char *)bbb_ahrs_id);
-	BodyAccelMessage body;
-	AngularRateMessage ang_rate;
-	mcan.add_message(&body);
-	mcan.add_message(&ang_rate);
+	BodyAccelMessage body(50);
+	AngularRateMessage ang_rate(50);
+	mcan.add_message(body.getMsg());
+	mcan.add_message(ang_rate.getMsg());
 
 	// main program loop
 	while (true)
@@ -106,14 +106,14 @@ int main() {
 
 			// update body acceleration can message
 			body.updateFrame(accelp);
-			mcan.update_message(&body);
+			mcan.update_message(body.getMsg());
 
-			mFile << accelp.toFile(false, ',') << ",";
-			double pitch = adx.getPitch();
-			double roll = adx.getRoll();
-			mFile << pitch * (180/PI) << ",";
-			mFile << roll * (180/PI) << ",";
-			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";
+//			mFile << accelp.toFile(false, ',') << ",";
+//			double pitch = adx.getPitch();
+//			double roll = adx.getRoll();
+//			mFile << pitch * (180/PI) << ",";
+//			mFile << roll * (180/PI) << ",";
+//			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";
 //			cout << p.toString(false) << endl;
 
 			DataPoint gyrop = l3g.getSensorData();
@@ -123,7 +123,7 @@ int main() {
 
 			// update angular acceleration can message
 			ang_rate.updateFrame(gyrop);
-			mcan.update_message(&ang_rate);
+			mcan.update_message(ang_rate.getMsg());
 
 			DataPoint magp = hmc.getSensorData();
 //			cout << p.toString(false) << endl;
@@ -132,13 +132,13 @@ int main() {
 			mFile << heading << ",";
 
 			// calculate yaw rate
-			double XH = (magp.getXf() * cos(pitch)) +
-						(magp.getYf() * sin(pitch) * sin(roll)) +
-						(magp.getZf() * sin(pitch) * cos(roll));
-			double YH = (magp.getYf() * cos(roll)) + (magp.getZf() * sin(roll));
-			double yaw = atan(-YH/XH) * (180/PI);	// why not atan2?
-
-			mFile << yaw << ",";
+//			double XH = (magp.getXf() * cos(pitch)) +
+//						(magp.getYf() * sin(pitch) * sin(roll)) +
+//						(magp.getZf() * sin(pitch) * cos(roll));
+//			double YH = (magp.getYf() * cos(roll)) + (magp.getZf() * sin(roll));
+//			double yaw = atan(-YH/XH) * (180/PI);	// why not atan2?
+//
+//			mFile << yaw << ",";
 
 			// update MadgwickAHRS
 			DataPoint g_rad = gyrop * (PI/180);

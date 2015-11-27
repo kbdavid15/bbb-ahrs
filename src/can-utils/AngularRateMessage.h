@@ -20,7 +20,7 @@ public:
 	AngularRateMessage();
 	AngularRateMessage(long period);
 	virtual ~AngularRateMessage();
-	virtual can_frame getFrame();
+	virtual void updateFrameData();
 	void init(long period_ms);
 	void updateFrame(DataPoint p);
 };

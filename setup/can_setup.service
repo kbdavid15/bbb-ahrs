@@ -1,0 +1,9 @@
+[Unit]
+Description=Enable can0 interface
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/can_setup.sh
+
+[Install]
+WantedBy=multi-user.target

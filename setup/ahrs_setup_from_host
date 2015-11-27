@@ -1,13 +1,21 @@
 #! /bin/bash
 
-scp BBB-AHRS-00A0.dts root@192.168.7.2:/tmp
+scp BBB-AHRS-00A0.dts can_setup.sh can_setup.service root@192.168.1.3:/tmp
 
-ssh root@192.168.7.2 '
+ssh root@192.168.1.3 '
 cd /tmp
 
-dtc -O dtb -o BBB-AHRS-00A0.dtbo -b 0 -@ BBB-AHRS-00A0.dts
+#dtc -O dtb -o BBB-AHRS-00A0.dtbo -b 0 -@ BBB-AHRS-00A0.dts
+#cp -r BBB-AHRS-00A0.dtbo /lib/firmware
+#rm -rf BBB-AHRS*
 
-cp -r BBB-AHRS-00A0.dtbo /lib/firmware
+cp can_setup.sh /usr/bin
+chmod +x /usr/bin/can_setup.sh
+cp can_setup.service /lib/systemd/
 
-rm -rf BBB-AHRS*
+ln -s /lib/systemd/can_setup.service /etc/systemd/system/can_setup.service
+
+systemctl daemon-reload
+systemctl enable can_setup.service
+systemctl start can_setup.service
 '

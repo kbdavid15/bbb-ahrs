@@ -20,7 +20,7 @@ public:
 	BodyAccelMessage();
 	BodyAccelMessage(long period_ms);
 	virtual ~BodyAccelMessage();
-	virtual can_frame getFrame();
+	virtual void updateFrameData();
 	void init(long period_ms);
 	void updateFrame(DataPoint p);
 };

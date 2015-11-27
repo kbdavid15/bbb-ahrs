@@ -9,7 +9,7 @@
 
 
 txmsg::txmsg() {
-	period_ms = 1000;
+	//period_ms = 1000;
 }
 txmsg::~txmsg() {
 
