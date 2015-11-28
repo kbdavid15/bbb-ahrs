@@ -24,6 +24,7 @@
 #include "Sensor.h"
 #include "can-utils/BodyAccelMessage.h"
 #include "can-utils/AngularRateMessage.h"
+#include "can-utils/HeadingPitchRollMessage.h"
 extern "C" {
 	#include "MadgwickAHRS/MadgwickAHRS.h"
 }
@@ -93,8 +94,10 @@ int main() {
 	mcan.add_message(0x513, 5000, 8, (unsigned char *)bbb_ahrs_id);
 	BodyAccelMessage body(50);
 	AngularRateMessage ang_rate(50);
+	HeadingPitchRollMessage hprmsg(50);
 	mcan.add_message(body.getMsg());
 	mcan.add_message(ang_rate.getMsg());
+	mcan.add_message(hprmsg.getMsg());
 
 	// main program loop
 	while (true)
@@ -145,9 +148,9 @@ int main() {
 			MadgwickAHRSupdate(g_rad.getXf(), g_rad.getYf(), g_rad.getZf(),
 					accelp.getXf(), accelp.getYf(), accelp.getZf(),
 					magp.getXf(), magp.getYf(), magp.getZf());
-			float MadPitch = atan2(2*q1*q2 - 2*q0*q3, 2*q0*q0 + 2*q1*q1 - 1);
-			float MadRoll = -asin(2*q1*q3 + 2*q0*q2);
-			float MadHeading = atan2(2*q2*q3 - 2*q0*q2, 2*q0*q0 + 2*q3*q3 - 1);
+			float MadHeading = atan2(2*q2*q3 - 2*q1*q4, 2*q1*q1 + 2*q2*q2 - 1);
+			float MadRoll = -asin(2*q2*q4 + 2*q1*q3);
+			float MadPitch = atan2(2*q3*q4 - 2*q1*q2, 2*q1*q1 + 2*q4*q4 - 1);
 			mFile << MadPitch << ",";
 			mFile << MadRoll << ",";
 			mFile << MadHeading << ",";
@@ -155,6 +158,9 @@ int main() {
 			cout << "Pitch: " << MadPitch << "\t";
 			cout << "Roll: " << MadRoll << "\t";
 			cout << "Heading: " << MadHeading << endl;
+
+			hprmsg.updateFrame(MadHeading*(180/PI), MadPitch*(180/PI), MadRoll*(180/PI));
+			mcan.update_message(hprmsg.getMsg());
 
 			mFile << endl;
 			counter++;
