@@ -8,7 +8,7 @@
 #ifndef CAN_UTILS_HEADINGPITCHROLLMESSAGE_H_
 #define CAN_UTILS_HEADINGPITCHROLLMESSAGE_H_
 
-#include "TxMsg.h"
+#include "can-utils/TxMsg.h"
 
 class HeadingPitchRollMessage: public TxMsg {
 private:

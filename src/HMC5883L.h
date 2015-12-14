@@ -47,7 +47,7 @@
 
 #define PI 					3.14159265
 
-#include "../src/myi2c.h"
+#include "i2cDevice.h"
 #include "../src/Sensor.h"
 #include <string>
 #include <sstream>

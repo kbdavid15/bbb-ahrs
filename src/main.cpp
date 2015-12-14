@@ -21,9 +21,9 @@
 #include "HMC5883L.h"
 #include "L3G4200D.h"
 #include "Sensor.h"
-#include "can-utils/BodyAccelMessage.h"
-#include "can-utils/AngularRateMessage.h"
-#include "can-utils/HeadingPitchRollMessage.h"
+#include "BodyAccelMessage.h"
+#include "AngularRateMessage.h"
+#include "HeadingPitchRollMessage.h"
 #include "can-utils/TxMsg.h"
 extern "C" {
 	#include "MadgwickAHRS/MadgwickAHRS.h"

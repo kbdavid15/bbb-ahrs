@@ -8,8 +8,8 @@
 #ifndef CAN_UTILS_ANGULARRATEMESSAGE_H_
 #define CAN_UTILS_ANGULARRATEMESSAGE_H_
 
-#include "../DataPoint.h"
-#include "TxMsg.h"
+#include "DataPoint.h"
+#include "can-utils/TxMsg.h"
 
 class AngularRateMessage: virtual public TxMsg {
 private:
