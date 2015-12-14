@@ -8,10 +8,10 @@
 #ifndef CAN_UTILS_BODYACCELMESSAGE_H_
 #define CAN_UTILS_BODYACCELMESSAGE_H_
 
-#include "txmsg.h"
 #include "../DataPoint.h"
+#include "TxMsg.h"
 
-class BodyAccelMessage: public txmsg {
+class BodyAccelMessage: virtual public TxMsg {
 private:
 	int16_t x_acceleration;
 	int16_t y_acceleration;
@@ -21,7 +21,7 @@ public:
 	BodyAccelMessage(long period_ms);
 	virtual ~BodyAccelMessage();
 	virtual void updateFrameData();
-	void init(long period_ms);
+	void init();
 	void updateFrame(DataPoint p);
 };
 

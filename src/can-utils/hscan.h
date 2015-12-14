@@ -12,7 +12,7 @@
 #include "linux/can/bcm.h"
 #include <net/if.h>
 
-#include "txmsg.h"
+#include "TxMsg.h"
 
 class can {
 private:

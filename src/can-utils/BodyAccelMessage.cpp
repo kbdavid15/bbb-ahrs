@@ -7,35 +7,18 @@
 
 #include "BodyAccelMessage.h"
 
-BodyAccelMessage::BodyAccelMessage() {
-	period_ms = 50;
-	init(period_ms);
+BodyAccelMessage::BodyAccelMessage() : TxMsg(50, ARBID_BODY_ACCELERATIONS, 6) {
+	init();
 }
 
-BodyAccelMessage::BodyAccelMessage(long period) {
-	period_ms = period;
-	init(period_ms);
+BodyAccelMessage::BodyAccelMessage(long period) : TxMsg(period, ARBID_BODY_ACCELERATIONS, 6)  {
+	init();
 }
 
-void BodyAccelMessage::init(long period) {
+void BodyAccelMessage::init() {
 	x_acceleration = 0;
 	y_acceleration = 0;
 	z_acceleration = 0;
-	msg.msg_head.opcode = TX_SETUP;
-	msg.msg_head.can_id = ARBID_BODY_ACCELERATIONS;
-	msg.msg_head.nframes = 1;
-	msg.msg_head.count = 0;
-	msg.msg_head.ival1.tv_sec = 0;
-	msg.msg_head.ival1.tv_usec = 0;
-	if (period > 1000) { // 1 second
-		msg.msg_head.ival2.tv_sec = period / 1000;
-		msg.msg_head.ival2.tv_usec = (period % 1000) * 1000;
-	} else {
-		msg.msg_head.ival2.tv_sec = 0;
-		msg.msg_head.ival2.tv_usec = period * 1000;
-	}
-	msg.frame.can_dlc = 6;
-	msg.frame.can_id  = ARBID_BODY_ACCELERATIONS;
 	updateFrameData();
 }
 

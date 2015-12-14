@@ -8,10 +8,10 @@
 #ifndef TXMSG_H_
 #define TXMSG_H_
 
-#define ARBID_VELOCITY				0x603;
-#define ARBID_BODY_ACCELERATIONS	0x605;
-#define ARBID_HEADING_PITCH_ROLL	0x607;
-#define ARBID_ANGULAR_RATE			0x608;
+const int ARBID_VELOCITY 		   = 0x603;
+const int ARBID_BODY_ACCELERATIONS = 0x605;
+const int ARBID_HEADING_PITCH_ROLL = 0x607;
+const int ARBID_ANGULAR_RATE	   = 0x608;
 
 #include <linux/can.h>
 #include <stdint.h>
@@ -22,13 +22,13 @@ struct bcm_message {
 	struct can_frame frame;
 };
 
-class txmsg {
+class TxMsg {
 protected:
 	struct bcm_message msg;
 public:
-	uint32_t  period_ms;
-	txmsg();
-	virtual ~txmsg();
+	TxMsg();
+	TxMsg(uint32_t period, canid_t arbid, uint8_t dlc);
+	virtual ~TxMsg();
 	virtual void updateFrameData() = 0;
 
 	const struct bcm_message& getMsg() const {

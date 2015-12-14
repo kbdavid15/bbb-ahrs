@@ -7,35 +7,18 @@
 
 #include "AngularRateMessage.h"
 
-AngularRateMessage::AngularRateMessage() {
-	period_ms = 50;
-	init(period_ms);
+AngularRateMessage::AngularRateMessage() : TxMsg(50, ARBID_ANGULAR_RATE, 6) {
+	init();
 }
 
-AngularRateMessage::AngularRateMessage(long period) {
-	period_ms = period;
-	init(period_ms);
+AngularRateMessage::AngularRateMessage(long period) : TxMsg(period, ARBID_ANGULAR_RATE, 6) {
+	init();
 }
 
-void AngularRateMessage::init(long period) {
+void AngularRateMessage::init() {
 	x_angular_rate = 0;
 	y_angular_rate = 0;
 	z_angular_rate = 0;
-	msg.msg_head.opcode = TX_SETUP;
-	msg.msg_head.can_id = ARBID_ANGULAR_RATE;
-	msg.msg_head.nframes = 1;
-	msg.msg_head.count = 0;
-	msg.msg_head.ival1.tv_sec = 0;
-	msg.msg_head.ival1.tv_usec = 0;
-	if (period > 1000) { // 1 second
-		msg.msg_head.ival2.tv_sec = period / 1000;
-		msg.msg_head.ival2.tv_usec = (period % 1000) * 1000;
-	} else {
-		msg.msg_head.ival2.tv_sec = 0;
-		msg.msg_head.ival2.tv_usec = period * 1000;
-	}
-	msg.frame.can_dlc = 6;
-	msg.frame.can_id  = ARBID_ANGULAR_RATE;
 	updateFrameData();
 }
 

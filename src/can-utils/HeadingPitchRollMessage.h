@@ -8,9 +8,9 @@
 #ifndef CAN_UTILS_HEADINGPITCHROLLMESSAGE_H_
 #define CAN_UTILS_HEADINGPITCHROLLMESSAGE_H_
 
-#include "txmsg.h"
+#include "TxMsg.h"
 
-class HeadingPitchRollMessage: public txmsg {
+class HeadingPitchRollMessage: public TxMsg {
 private:
 	uint16_t heading;
 	int16_t pitch;
@@ -20,7 +20,7 @@ public:
 	HeadingPitchRollMessage(long period);
 	virtual ~HeadingPitchRollMessage();
 	virtual void updateFrameData();
-	void init(long period_ms);
+	void init();
 	void updateFrame(float heading, float pitch, float roll);
 };
 

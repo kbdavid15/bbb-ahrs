@@ -17,7 +17,6 @@
 
 #include "ADXL345.h"
 #include "can-utils/hscan.h"
-#include "can-utils/txmsg.h"
 #include "DataPoint.h"
 #include "HMC5883L.h"
 #include "L3G4200D.h"
@@ -25,6 +24,7 @@
 #include "can-utils/BodyAccelMessage.h"
 #include "can-utils/AngularRateMessage.h"
 #include "can-utils/HeadingPitchRollMessage.h"
+#include "can-utils/TxMsg.h"
 extern "C" {
 	#include "MadgwickAHRS/MadgwickAHRS.h"
 }
@@ -74,7 +74,6 @@ int main() {
 	adx.setDataFormat(format);	// value of 0x0B sets full resolution mode and range to +/- 16g
 	adx.setPowerCtrl(0x08);		// value of 0x08 enables measurement mode
 	adx.setInterruptEnable(0x00);	// disables interrupts
-//	adx.setInterruptEnable(0x80);	// value of 0x80 enables DataReady bit
 	PwrDataRate odr(false, ODR_100); // set data rate to 100Hz
 	adx.setDataRate(odr);
 	adx.setLPF(0.5);
@@ -148,18 +147,18 @@ int main() {
 			MadgwickAHRSupdate(g_rad.getXf(), g_rad.getYf(), g_rad.getZf(),
 					accelp.getXf(), accelp.getYf(), accelp.getZf(),
 					magp.getXf(), magp.getYf(), magp.getZf());
-			float MadHeading = atan2(2*q2*q3 - 2*q1*q4, 2*q1*q1 + 2*q2*q2 - 1);
-			float MadRoll = -asin(2*q2*q4 + 2*q1*q3);
-			float MadPitch = atan2(2*q3*q4 - 2*q1*q2, 2*q1*q1 + 2*q4*q4 - 1);
-			mFile << MadPitch << ",";
-			mFile << MadRoll << ",";
-			mFile << MadHeading << ",";
+			float madHeading = atan2(2*q2*q3 - 2*q1*q4, 2*q1*q1 + 2*q2*q2 - 1);
+			float madRoll = -asin(2*q2*q4 + 2*q1*q3);
+			float madPitch = atan2(2*q3*q4 - 2*q1*q2, 2*q1*q1 + 2*q4*q4 - 1);
+			mFile << madPitch << ",";
+			mFile << madRoll << ",";
+			mFile << madHeading << ",";
 
-			cout << "Pitch: " << MadPitch << "\t";
-			cout << "Roll: " << MadRoll << "\t";
-			cout << "Heading: " << MadHeading << endl;
+			cout << "Pitch: " << madPitch << "\t";
+			cout << "Roll: " << madRoll << "\t";
+			cout << "Heading: " << madHeading << endl;
 
-			hprmsg.updateFrame(MadHeading*(180/PI), MadPitch*(180/PI), MadRoll*(180/PI));
+			hprmsg.updateFrame(madHeading*(180/PI), madPitch*(180/PI), madRoll*(180/PI));
 			mcan.update_message(hprmsg.getMsg());
 
 			mFile << endl;
