@@ -14,15 +14,16 @@
 
 #include "TxMsg.h"
 
-class can {
+class hscan {
 private:
 	int bcm_socket;
 	struct sockaddr_can addr;
 	struct ifreq ifr;
 
 public:
-	can();	// defaults to using the "can0" interface
-	can(const char * interface);
+	hscan();	// defaults to using the "can0" interface
+	hscan(const char * interface);
+	virtual ~hscan();
 	void add_message(bcm_message msg);
 	bcm_message add_message(canid_t addr, long period, unsigned char len, unsigned char * data);
 	bcm_message add_message(can_frame frame, long period);

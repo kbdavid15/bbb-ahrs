@@ -7,10 +7,6 @@
 
 #include "TxMsg.h"
 
-
-TxMsg::TxMsg() {
-	//period_ms = 1000;
-}
 TxMsg::TxMsg(uint32_t period, canid_t arbid, uint8_t dlc) {
 	msg.msg_head.opcode = TX_SETUP;
 	msg.msg_head.can_id = arbid;
@@ -29,6 +25,7 @@ TxMsg::TxMsg(uint32_t period, canid_t arbid, uint8_t dlc) {
 	msg.frame.can_dlc = dlc;
 	msg.frame.can_id  = arbid;
 }
+
 TxMsg::~TxMsg() {
 
 }

@@ -17,14 +17,15 @@
 
 #include "ADXL345.h"
 #include "can-utils/hscan.h"
+#include "can-utils/TxMsg.h"
 #include "DataPoint.h"
 #include "HMC5883L.h"
 #include "L3G4200D.h"
+#include "MessageAngularRate.h"
+#include "MessageBodyAccel.h"
+#include "MessageHeadingPitchRoll.h"
 #include "Sensor.h"
-#include "BodyAccelMessage.h"
-#include "AngularRateMessage.h"
-#include "HeadingPitchRollMessage.h"
-#include "can-utils/TxMsg.h"
+
 extern "C" {
 	#include "MadgwickAHRS/MadgwickAHRS.h"
 }
@@ -88,12 +89,12 @@ int main() {
 	long counter = 0;
 
 	// send can frame
-	can mcan;
+	hscan mcan;
 	const char * bbb_ahrs_id = "BBB-AHRS";
 	mcan.add_message(0x513, 5000, 8, (unsigned char *)bbb_ahrs_id);
-	BodyAccelMessage body(50);
-	AngularRateMessage ang_rate(50);
-	HeadingPitchRollMessage hprmsg(50);
+	MessageBodyAccel body;
+	MessageAngularRate ang_rate(50);
+	MessageHeadingPitchRoll hprmsg(50);
 	mcan.add_message(body.getMsg());
 	mcan.add_message(ang_rate.getMsg());
 	mcan.add_message(hprmsg.getMsg());

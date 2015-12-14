@@ -5,35 +5,30 @@
  *      Author: kbdavid15
  */
 
-#include "BodyAccelMessage.h"
+#include "MessageBodyAccel.h"
 
-BodyAccelMessage::BodyAccelMessage() : TxMsg(50, ARBID_BODY_ACCELERATIONS, 6) {
-	init();
+MessageBodyAccel::MessageBodyAccel() : MessageBodyAccel(50) {
 }
 
-BodyAccelMessage::BodyAccelMessage(long period) : TxMsg(period, ARBID_BODY_ACCELERATIONS, 6)  {
-	init();
-}
-
-void BodyAccelMessage::init() {
+MessageBodyAccel::MessageBodyAccel(long period) : TxMsg(period, ARBID_BODY_ACCELERATIONS, 6)  {
 	x_acceleration = 0;
 	y_acceleration = 0;
 	z_acceleration = 0;
 	updateFrameData();
 }
 
-BodyAccelMessage::~BodyAccelMessage() {
+MessageBodyAccel::~MessageBodyAccel() {
 	// TODO Auto-generated destructor stub
 }
 
-void BodyAccelMessage::updateFrame(DataPoint p) {
+void MessageBodyAccel::updateFrame(DataPoint p) {
 	x_acceleration = p.getXf() / 0.01;
 	y_acceleration = p.getYf() / 0.01;
 	z_acceleration = p.getZf() / 0.01;
 	updateFrameData();
 }
 
-void BodyAccelMessage::updateFrameData() {
+void MessageBodyAccel::updateFrameData() {
 	msg.frame.data[0] = x_acceleration >> 8;
 	msg.frame.data[1] = x_acceleration & 0xFF;
 	msg.frame.data[2] = y_acceleration >> 8;

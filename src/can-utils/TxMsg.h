@@ -26,10 +26,8 @@ class TxMsg {
 protected:
 	struct bcm_message msg;
 public:
-	TxMsg();
 	TxMsg(uint32_t period, canid_t arbid, uint8_t dlc);
 	virtual ~TxMsg();
-	virtual void updateFrameData() = 0;
 
 	const struct bcm_message& getMsg() const {
 		return msg;

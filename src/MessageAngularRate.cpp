@@ -1,39 +1,34 @@
 /*
- * AngularRateMessage.cpp
+ * MessageAngularRate.cpp
  *
  *  Created on: Nov 21, 2015
  *      Author: kbdavid15
  */
 
-#include "AngularRateMessage.h"
+#include "MessageAngularRate.h"
 
-AngularRateMessage::AngularRateMessage() : TxMsg(50, ARBID_ANGULAR_RATE, 6) {
-	init();
+MessageAngularRate::MessageAngularRate() : MessageAngularRate(50) {
 }
 
-AngularRateMessage::AngularRateMessage(long period) : TxMsg(period, ARBID_ANGULAR_RATE, 6) {
-	init();
-}
-
-void AngularRateMessage::init() {
+MessageAngularRate::MessageAngularRate(long period) : TxMsg(period, ARBID_ANGULAR_RATE, 6) {
 	x_angular_rate = 0;
 	y_angular_rate = 0;
 	z_angular_rate = 0;
 	updateFrameData();
 }
 
-AngularRateMessage::~AngularRateMessage() {
+MessageAngularRate::~MessageAngularRate() {
 	// TODO Auto-generated destructor stub
 }
 
-void AngularRateMessage::updateFrame(DataPoint p) {
+void MessageAngularRate::updateFrame(DataPoint p) {
 	x_angular_rate = p.getXf() / 0.01;
 	y_angular_rate = p.getYf() / 0.01;
 	z_angular_rate = p.getZf() / 0.01;
 	updateFrameData();
 }
 
-void AngularRateMessage::updateFrameData() {
+void MessageAngularRate::updateFrameData() {
 	msg.frame.data[0] = x_angular_rate >> 8;
 	msg.frame.data[1] = x_angular_rate & 0xFF;
 	msg.frame.data[2] = y_angular_rate >> 8;

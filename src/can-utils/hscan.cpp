@@ -14,9 +14,9 @@
 #include <cstdio>
 #include <cstring>
 
-can::can() : can("can0") {}
+hscan::hscan() : hscan("can0") {}
 
-can::can(const char * interface) {
+hscan::hscan(const char * interface) {
 	// initialize the interface
 	bcm_socket = socket(PF_CAN, SOCK_DGRAM, CAN_BCM);
 	addr.can_family = AF_CAN;
@@ -27,13 +27,17 @@ can::can(const char * interface) {
 	connect(bcm_socket, (struct sockaddr *)&addr, sizeof(addr));
 }
 
-void can::add_message(bcm_message msg) {
+hscan::~hscan() {
+
+}
+
+void hscan::add_message(bcm_message msg) {
 	// set up the message
 	msg.msg_head.flags = SETTIMER | STARTTIMER;
 	write(bcm_socket, &msg, sizeof(msg));
 }
 
-bcm_message can::add_message(canid_t addr, long period, unsigned char len,
+bcm_message hscan::add_message(canid_t addr, long period, unsigned char len,
 		unsigned char* data) {
 	bcm_message msg;
 	msg.msg_head.opcode = TX_SETUP;
@@ -56,7 +60,7 @@ bcm_message can::add_message(canid_t addr, long period, unsigned char len,
 	return msg;
 }
 
-bcm_message can::add_message(can_frame frame, long period) {
+bcm_message hscan::add_message(can_frame frame, long period) {
 	bcm_message msg;
 	msg.msg_head.opcode = TX_SETUP;
 	msg.msg_head.can_id = frame.can_id;
@@ -75,7 +79,7 @@ bcm_message can::add_message(can_frame frame, long period) {
 	return msg;
 }
 
-void can::update_message(bcm_message msg) {
+void hscan::update_message(bcm_message msg) {
 	msg.msg_head.flags = 0;
 	write(bcm_socket, &msg, sizeof(msg));
 }
