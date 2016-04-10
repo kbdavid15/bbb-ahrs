@@ -25,4 +25,3 @@ change your current directory to script's directory with "cd" command.
 wget -c https://raw.github.com/RobertCNelson/tools/master/pkgs/dtc.sh 
 chmod +x dtc.sh 
 ./dtc.sh
-

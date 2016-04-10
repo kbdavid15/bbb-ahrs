@@ -22,21 +22,20 @@ To see exactly which pins are in use by the BeagleBone, look at the contents of 
     cat /sys/kernel/debug/pinctrl/44e10800.pinmux/pingroups
     cat /sys/kernel/debug/pinctrl/44e10800.pinmux/pinmux-pins |more
     
-    The .dtbo file BBB-AHRS-00A0.dtbo shoule be present in /lib/firmware/
+The .dtbo file BBB-AHRS-00A0.dtbo shoule be present in /lib/firmware/
     
 ##Modify uEnv.txt
 This cape uses SPI1, which is connected to the same pins as the HDMI framer. HDMI must be disabled for this cape to work properly. Add the following line to uEnv.txt
 	capemgr.disable\_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN capemgr.enable_partno=BBB-AHRS
 	
 ##The Cape Manager
-cd /sys/devices/bone_capemgr.*
-cat slots
- 0: 54:PF--- 
- 1: 55:PF--- 
- 2: 56:PF--- 
- 3: 57:PF--- 
- 4: ff:P-O-L Bone-LT-eMMC-2G,00A0,Texas Instrument,BB-BONE-EMMC-2G
- 5: ff:P-O-- Bone-Black-HDMI,00A0,Texas Instrument,BB-BONELT-HDMI
- 6: ff:P-O-- Bone-Black-HDMIN,00A0,Texas Instrument,BB-BONELT-HDMIN
- 7: ff:P-O-L Override Board Name,00A0,Override Manuf,BBB-AHRS
+    cat /sys/devices/bone_capemgr.*/slots
+     0: 54:PF--- 
+     1: 55:PF--- 
+     2: 56:PF--- 
+     3: 57:PF--- 
+     4: ff:P-O-L Bone-LT-eMMC-2G,00A0,Texas Instrument,BB-BONE-EMMC-2G
+     5: ff:P-O-- Bone-Black-HDMI,00A0,Texas Instrument,BB-BONELT-HDMI
+     6: ff:P-O-- Bone-Black-HDMIN,00A0,Texas Instrument,BB-BONELT-HDMIN
+     7: ff:P-O-L Override Board Name,00A0,Override Manuf,BBB-AHRS
 

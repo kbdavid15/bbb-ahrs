@@ -14,7 +14,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-
+#include "AHRS.h"
 #include "ADXL345.h"
 #include "can-utils/hscan.h"
 #include "can-utils/TxMsg.h"
@@ -41,7 +41,7 @@ void timer_handler(int signum) {
 	updateDataFlag = true;
 }
 
-int main() {
+void setup_interrupt() {
 	struct sigaction sa;
 	struct itimerval timer;
 	memset ( &sa, 0, sizeof ( sa ) );
@@ -55,34 +55,13 @@ int main() {
 	timer.it_interval.tv_usec = SAMPLE_RATE_uS;
 
 	setitimer ( ITIMER_REAL, &timer, NULL );
+}
 
-	// create device objects and initialize
-	HMC5883L hmc;
-	hmc.setModeRegister(ContinuousMeasurement);
-	hmc.setConfigRegA((ConfigRegA){ AvgSamples1, DataRate_75, NormalMode });
-//	hmc.setConfigRegB(GAIN_0);
+int main() {
+	setup_interrupt();
 
-	L3G4200D l3g;
-	l3g.calculateOffset();
-
-	ADXL345 adx;
-//	adx.startSelfTest();
-	adx.resetOffset();
-	//adx.calibrateOffset();	issue with z axis calibration (COMPOUNDING CALIBRATIONS, NEED TO RESET BEFORE CALCULATING)
-
-	DataFormat format;
-	format.fullRes = 1;
-	format.range = DataRange2g;
-	format.justify = 0;
-	adx.setDataFormat(format);	// value of 0x0B sets full resolution mode and range to +/- 16g
-	adx.setPowerCtrl(0x08);		// value of 0x08 enables measurement mode
-	adx.setInterruptEnable(0x00);	// disables interrupts
-	PwrDataRate odr(false, ODR_100); // set data rate to 100Hz
-	adx.setDataRate(odr);
-	adx.setLPF(0.5);
-	// wait 1.1ms + 1/ODR
-	struct timespec waitTime = adx.getInitWaitTime();
-	nanosleep(&waitTime, NULL);
+	AHRS ahrs;
+	ahrs.init();
 
 #ifdef LOG_FILE
 	ofstream mFile;
@@ -103,17 +82,17 @@ int main() {
 	mcan.add_message(ang_rate.getMsg());
 	mcan.add_message(hprmsg.getMsg());
 
-	adx.setLPF(0.05);
-	l3g.setLPF(0.005);
+	ahrs.accel.setLPF(0.05);
+	ahrs.gyro.setLPF(0.005);
 
 	// main program loop
 	while (true)
 	{
 		if (updateDataFlag)
 		{
-			DataPoint accelp = adx.getSensorData();
-			DataPoint gyrop = l3g.getSensorData();
-			DataPoint magp = hmc.getSensorData();
+			DataPoint accelp = ahrs.accel.getSensorData();
+			DataPoint gyrop = ahrs.gyro.getSensorData();
+			DataPoint magp = ahrs.compass.getSensorData();
 
 //			DataPoint filt_accelp = adx.getLPFData();
 //			DataPoint filt_gyrop = l3g.getLPFData();
@@ -134,9 +113,6 @@ int main() {
 //			double roll = adx.getRoll();
 //			cout << p.toString(false) << endl;
 //			cout << gyrop.toString(false) << endl;
-
-
-
 //			cout << p.toString(false) << endl;
 
 //			double heading = hmc.getHeadingDeg();
