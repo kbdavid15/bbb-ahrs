@@ -30,6 +30,8 @@ extern "C" {
 	#include "MadgwickAHRS/MadgwickAHRS.h"
 }
 
+#define LOG_FILE = 1;
+
 using namespace std;
 
 bool updateDataFlag = true;
@@ -64,7 +66,7 @@ int main() {
 	l3g.calculateOffset();
 
 	ADXL345 adx;
-	adx.startSelfTest();
+//	adx.startSelfTest();
 	adx.resetOffset();
 	//adx.calibrateOffset();	issue with z axis calibration (COMPOUNDING CALIBRATIONS, NEED TO RESET BEFORE CALCULATING)
 
@@ -82,9 +84,11 @@ int main() {
 	struct timespec waitTime = adx.getInitWaitTime();
 	nanosleep(&waitTime, NULL);
 
+#ifdef LOG_FILE
 	ofstream mFile;
 	mFile.open("acceldata.csv", ios::out);
 	mFile << "AccelX,AccelY,AccelZ,Pitch,Roll,IntAccelX,GyroX,GyroY,GyroZ,IntGyroZ,MagX,MagY,MagZ,Heading,Yaw,MadPitch,MadRoll,MadHeading" << endl;
+#endif
 
 	long counter = 0;
 
@@ -99,40 +103,43 @@ int main() {
 	mcan.add_message(ang_rate.getMsg());
 	mcan.add_message(hprmsg.getMsg());
 
+	adx.setLPF(0.05);
+	l3g.setLPF(0.005);
+
 	// main program loop
 	while (true)
 	{
 		if (updateDataFlag)
 		{
 			DataPoint accelp = adx.getSensorData();
-			accelp = adx.getLPFData();
+			DataPoint gyrop = l3g.getSensorData();
+			DataPoint magp = hmc.getSensorData();
+
+//			DataPoint filt_accelp = adx.getLPFData();
+//			DataPoint filt_gyrop = l3g.getLPFData();
+
+			// update MadgwickAHRS
+			MadgwickAHRSupdate(gyrop.getXf()* (PI/180), gyrop.getYf()* (PI/180), gyrop.getZf()* (PI/180),
+					accelp.getXf(), accelp.getYf(), accelp.getZf(),
+					magp.getXf(), magp.getYf(), magp.getZf());
 
 			// update body acceleration can message
 			body.updateFrame(accelp);
 			mcan.update_message(body.getMsg());
-
-//			mFile << accelp.toFile(false, ',') << ",";
-//			double pitch = adx.getPitch();
-//			double roll = adx.getRoll();
-//			mFile << pitch * (180/PI) << ",";
-//			mFile << roll * (180/PI) << ",";
-//			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";
-//			cout << p.toString(false) << endl;
-
-			DataPoint gyrop = l3g.getSensorData();
-//			cout << gyrop.toString(false) << endl;
-			mFile << gyrop.toFile(false, ',') << ",";
-			mFile << l3g.trapZ(SAMPLE_RATE_uS) << ",";
-
-			// update angular acceleration can message
 			ang_rate.updateFrame(gyrop);
 			mcan.update_message(ang_rate.getMsg());
 
-			DataPoint magp = hmc.getSensorData();
+
+//			double pitch = adx.getPitch();
+//			double roll = adx.getRoll();
 //			cout << p.toString(false) << endl;
-			mFile << magp.toFile(false, ',') << ",";
-			double heading = hmc.getHeadingDeg();
-			mFile << heading << ",";
+//			cout << gyrop.toString(false) << endl;
+
+
+
+//			cout << p.toString(false) << endl;
+
+//			double heading = hmc.getHeadingDeg();
 
 			// calculate yaw rate
 //			double XH = (magp.getXf() * cos(pitch)) +
@@ -140,35 +147,41 @@ int main() {
 //						(magp.getZf() * sin(pitch) * cos(roll));
 //			double YH = (magp.getYf() * cos(roll)) + (magp.getZf() * sin(roll));
 //			double yaw = atan(-YH/XH) * (180/PI);	// why not atan2?
-//
-//			mFile << yaw << ",";
 
-			// update MadgwickAHRS
-			DataPoint g_rad = gyrop * (PI/180);
-			MadgwickAHRSupdate(g_rad.getXf(), g_rad.getYf(), g_rad.getZf(),
-					accelp.getXf(), accelp.getYf(), accelp.getZf(),
-					magp.getXf(), magp.getYf(), magp.getZf());
 			float madHeading = atan2(2*q2*q3 - 2*q1*q4, 2*q1*q1 + 2*q2*q2 - 1);
 			float madRoll = -asin(2*q2*q4 + 2*q1*q3);
-			float madPitch = atan2(2*q3*q4 - 2*q1*q2, 2*q1*q1 + 2*q4*q4 - 1);
-			mFile << madPitch << ",";
-			mFile << madRoll << ",";
-			mFile << madHeading << ",";
+			float madPitch = atan2(2*q3*q4 - 2*q1*q2, 2*q1*q1 + 2*q4*q4 - 1);	// unsure why calculation is off by 180 degrees
 
-			cout << "Pitch: " << madPitch << "\t";
-			cout << "Roll: " << madRoll << "\t";
-			cout << "Heading: " << madHeading << endl;
+//			cout << "Pitch: " << madPitch << "\t";
+//			cout << "Roll: " << madRoll << "\t";
+//			cout << "Heading: " << madHeading << endl;
 
 			hprmsg.updateFrame(madHeading*(180/PI), madPitch*(180/PI), madRoll*(180/PI));
 			mcan.update_message(hprmsg.getMsg());
 
+#ifdef LOG_FILE
+//			mFile << pitch * (180/PI) << ",";
+//			mFile << roll * (180/PI) << ",";
+//			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";
+			mFile << accelp.toFile(false, ',') << ",";
+			mFile << gyrop.toFile(false, ',') << ",";
+//			mFile << magp.toFile(false, ',') << ",";
+//			mFile << heading << ",";
+//			mFile << yaw << ",";
+//			mFile << madPitch << ",";
+//			mFile << madRoll << ",";
+//			mFile << madHeading << ",";
 			mFile << endl;
+#endif
 			counter++;
 			updateDataFlag = false;
 		}
 //		if (counter > 500) break;
 	}
+
+#ifdef LOG_FILE
 	mFile.close();
+#endif
 
 	return 0;
 }

@@ -15,11 +15,11 @@
 class DataPoint {
 private:
 	long x = 0, y = 0, z = 0;
-	float  xf = 0, yf = 0, zf = 0;
+
 	double dataFormatMult;
 //	double lpf = 1;	// default value of 1 means no filter
 public:
-
+	float  xf = 0, yf = 0, zf = 0;
 	DataPoint operator -(const DataPoint& p);
 	DataPoint operator +(const DataPoint& p);
 	DataPoint operator /(const double);

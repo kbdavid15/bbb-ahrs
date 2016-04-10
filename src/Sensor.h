@@ -13,7 +13,8 @@
 //#include <queue>
 #include <deque>
 
-#include "../src/DataPoint.h"
+#include "DataPoint.h"
+#include "DoublePoint.h"
 
 class Sensor {
 private:
@@ -35,6 +36,7 @@ public:
 	double trapX(long);	// trapezoidal integral
 	double trapZ(long);	// trapezoidal integral
 	DataPoint getLPFData();
+	DoublePoint* SimpleLowPass(double alpha);
 	virtual DataPoint getSensorData()=0;	// must be defined in implementation class
 
 	void setLPF(double alpha) {
