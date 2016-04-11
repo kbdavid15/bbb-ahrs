@@ -32,7 +32,7 @@
 
 #include <fstream>
 #include <string>
-#include "../../../src/BlackLib/BlackCore.h"
+#include "../BlackCore.h"
 
 
 

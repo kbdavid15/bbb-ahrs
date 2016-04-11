@@ -8,7 +8,7 @@
 #ifndef MESSAGEBODYACCEL_H_
 #define MESSAGEBODYACCEL_H_
 
-#include "DataPoint.h"
+#include "sensor/DataPoint.h"
 #include "can-utils/TxMsg.h"
 
 class MessageBodyAccel: public TxMsg {

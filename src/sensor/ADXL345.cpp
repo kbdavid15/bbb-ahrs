@@ -11,12 +11,14 @@
 #include <math.h>
 #include "BlackLib/BlackSPI/BlackSPI.h"
 
+namespace sensor {
+
+using namespace std;
+
 #ifndef PI
 #define PI				3.14159265359
 #endif
 #define G_CONVERSION	0.101972
-
-using namespace std;
 
 const double ADXL345::DATA_RATE_VAL[] = { 6.25, 12.5, 25, 50, 100, 200, 400, 800, 1600, 3200 };
 
@@ -204,3 +206,4 @@ double ADXL345::getRoll() {
 //	return value;
 	return atan(y/z);
 }
+};	/* namespace sensor */

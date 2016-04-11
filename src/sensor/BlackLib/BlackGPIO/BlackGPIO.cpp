@@ -29,7 +29,7 @@
 
 
 
-#include "../../../src/BlackLib/BlackGPIO/BlackGPIO.h"
+#include "BlackGPIO.h"
 
 
 

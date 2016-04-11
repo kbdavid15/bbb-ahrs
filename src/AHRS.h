@@ -8,10 +8,12 @@
 #ifndef AHRS_H_
 #define AHRS_H_
 
-#include "ADXL345.h"
-#include "L3G4200D.h"
-#include "HMC5883L.h"
+#include "sensor/ADXL345.h"
+#include "sensor/L3G4200D.h"
+#include "sensor/HMC5883L.h"
 #include "can-utils/hscan.h"
+
+using namespace sensor;
 
 class AHRS {
 private:

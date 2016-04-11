@@ -6,8 +6,9 @@
  */
 
 #include "HMC5883L.h"
-
 #include <iostream>
+
+namespace sensor {
 
 using namespace std;
 
@@ -197,3 +198,4 @@ GainIdx HMC5883L::Gain::incrementIdx() {
 	currentGain = (GainIdx)i;
 	return currentGain;
 }
+};	/* namespace sensor */

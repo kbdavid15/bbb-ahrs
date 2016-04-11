@@ -8,7 +8,7 @@
 #ifndef MESSAGEANGULARRATE_H_
 #define MESSAGEANGULARRATE_H_
 
-#include "DataPoint.h"
+#include "sensor/DataPoint.h"
 #include "can-utils/TxMsg.h"
 
 class MessageAngularRate: virtual public TxMsg {

@@ -16,16 +16,12 @@
 #include <string>
 
 #include "AHRS.h"
-#include "ADXL345.h"
 #include "can-utils/hscan.h"
 #include "can-utils/TxMsg.h"
-#include "DataPoint.h"
-#include "HMC5883L.h"
-#include "L3G4200D.h"
+#include "sensor/DataPoint.h"
 #include "MessageAngularRate.h"
 #include "MessageBodyAccel.h"
 #include "MessageHeadingPitchRoll.h"
-#include "Sensor.h"
 
 extern "C" {
 	#include "MadgwickAHRS/MadgwickAHRS.h"

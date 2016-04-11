@@ -8,6 +8,13 @@
 #ifndef L3G4200D_H_
 #define L3G4200D_H_
 
+#include "MySpi.h"
+#include <string>
+#include <sstream>
+#include "Sensor.h"
+
+namespace sensor {
+
 /* L3G4200D - 3-Axis Digital Gyroscope
  * Connected to SPI1_0
  * Register Definitions
@@ -39,10 +46,7 @@
 #define INT1_TSH_ZL 	0x37
 #define INT1_DURATION	0x38
 
-#include "../src/MySpi.h"
-#include <string>
-#include <sstream>
-#include "../src/Sensor.h"
+
 
 using namespace std;
 using namespace BlackLib;
@@ -167,5 +171,5 @@ using namespace BlackLib;
 		void calculateOffset();
 		long getWaitTime();
 	};
-
+};	/* namespace sensor */
 #endif /* L3G4200D_H_ */

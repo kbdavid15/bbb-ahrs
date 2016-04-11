@@ -8,6 +8,13 @@
 #ifndef ADXL345_H_
 #define ADXL345_H_
 
+#include "MySpi.h"
+#include <string>
+#include <sstream>
+#include "Sensor.h"
+
+namespace sensor {
+
 /* ADXL345 - Digital Accelerometer
  * Connected to SPI0_0
  * Register Definitions
@@ -51,11 +58,6 @@
 #define SELF_TEST_MAX_Y_16	-6
 #define SELF_TEST_MIN_Z_16	10
 #define SELF_TEST_MAX_Z_16	110
-
-#include "../src/MySpi.h"
-#include <string>
-#include <sstream>
-#include "../src/Sensor.h"
 
 /*
 +----------+---------+------------+
@@ -274,5 +276,7 @@ public:
 	double getPitch();
 	double getRoll();
 };
+
+};	/* namespace sensor */
 
 #endif /* ADXL345_H_ */

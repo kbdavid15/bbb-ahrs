@@ -8,6 +8,14 @@
 #ifndef HMC5883L_H_
 #define HMC5883L_H_
 
+#include "i2cDevice.h"
+#include "Sensor.h"
+#include <string>
+#include <sstream>
+#include <math.h>
+
+namespace sensor {
+
 /* HMC5883L - 3-Axis Digital Compass IC
  * Connected via I2C
  * Register Definitions
@@ -46,14 +54,6 @@
 #define GAIN_BIT_OFFSET		5		// shift gain value left 5 bits for register value
 
 #define PI 					3.14159265
-
-#include "i2cDevice.h"
-#include "../src/Sensor.h"
-#include <string>
-#include <sstream>
-#include <math.h>
-
-
 
 /*
 +-----+-----+-----+-------------------+-------------------+---------------------+-----------------------------+
@@ -214,4 +214,5 @@ public:
 	virtual DataPoint getSensorData();
 	double getHeadingDeg();
 };
+};	/* namespace sensor */
 #endif /* HMC5883L_H_ */

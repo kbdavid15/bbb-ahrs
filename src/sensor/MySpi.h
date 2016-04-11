@@ -13,7 +13,7 @@
 #define MULTI_BYTE_READ	(BYTE_READ | MULTI_BYTE)	// 0xC0
 #define BYTE_WRITE		0x00
 
-#include "../src/BlackLib/BlackSPI/BlackSPI.h"
+#include "BlackLib/BlackSPI/BlackSPI.h"
 
 using namespace BlackLib;
 

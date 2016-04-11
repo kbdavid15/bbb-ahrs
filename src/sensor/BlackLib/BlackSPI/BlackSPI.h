@@ -44,7 +44,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>
-#include "../../../src/BlackLib/BlackCore.h"
+#include "../BlackCore.h"
 
 
 using std::string;

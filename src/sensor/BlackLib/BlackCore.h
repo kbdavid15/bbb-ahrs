@@ -38,8 +38,8 @@
 #include <cstdio>           // need for popen() function in BlackCore::executeShellCmd()
 #include <dirent.h>         // need for dirent struct in BlackCore::searchDirectory()
 #include <stdint.h>
-#include "../../src/BlackLib/BlackDef.h"       // Black Definitions header file
-#include "../../src/BlackLib/BlackErr.h"       // Black Errors header file
+#include "BlackDef.h"       // Black Definitions header file
+#include "BlackErr.h"       // Black Errors header file
 
 
 
