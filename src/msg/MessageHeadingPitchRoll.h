@@ -5,8 +5,8 @@
  *      Author: kbdavid15
  */
 
-#ifndef MESSAGEHEADINGPITCHROLL_H_
-#define MESSAGEHEADINGPITCHROLL_H_
+#ifndef MSG_MESSAGEHEADINGPITCHROLL_H_
+#define MSG_MESSAGEHEADINGPITCHROLL_H_
 
 #include "can-utils/TxMsg.h"
 
@@ -26,4 +26,4 @@ public:
 	void updateFrame(float heading, float pitch, float roll);
 };
 
-#endif /* MESSAGEHEADINGPITCHROLL_H_ */
+#endif /* MSG_MESSAGEHEADINGPITCHROLL_H_ */

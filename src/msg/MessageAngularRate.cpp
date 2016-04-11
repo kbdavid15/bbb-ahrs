@@ -21,10 +21,10 @@ MessageAngularRate::~MessageAngularRate() {
 	// TODO Auto-generated destructor stub
 }
 
-void MessageAngularRate::updateFrame(DataPoint p) {
-	x_angular_rate = p.getXf() / 0.01;
-	y_angular_rate = p.getYf() / 0.01;
-	z_angular_rate = p.getZf() / 0.01;
+void MessageAngularRate::updateFrame(float x, float y, float z) {
+	x_angular_rate = x / 0.01;
+	y_angular_rate = y / 0.01;
+	z_angular_rate = z / 0.01;
 	updateFrameData();
 }
 

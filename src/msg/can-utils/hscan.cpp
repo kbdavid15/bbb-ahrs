@@ -5,7 +5,7 @@
  *      Author: kbdavid15
  */
 
-#include "hscan.h"
+#include "../../msg/can-utils/hscan.h"
 
 #include <linux/can/raw.h>
 #include <sys/ioctl.h>

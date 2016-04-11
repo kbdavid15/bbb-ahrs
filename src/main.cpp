@@ -6,28 +6,16 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-#include <math.h>
 #include <signal.h>
 #include <sys/time.h>
 #include <cstring>
 #include <ctime>
-#include <fstream>
-#include <iostream>
 #include <string>
+#include <iostream>
 
 #include "AHRS.h"
-#include "can-utils/hscan.h"
-#include "can-utils/TxMsg.h"
-#include "sensor/DataPoint.h"
-#include "MessageAngularRate.h"
-#include "MessageBodyAccel.h"
-#include "MessageHeadingPitchRoll.h"
 
-extern "C" {
-	#include "MadgwickAHRS/MadgwickAHRS.h"
-}
-
-#define LOG_FILE = 1;
+//#define LOG_FILE = 1;
 
 bool updateDataFlag = true;
 const long SAMPLE_RATE_uS = 10000;	// 10ms for 100Hz
@@ -80,17 +68,6 @@ int main() {
 
 	long counter = 0;
 
-	// send can frame
-	hscan mcan;
-	const char * bbb_ahrs_id = "BBB-AHRS";
-	mcan.add_message(0x513, 5000, 8, (unsigned char *)bbb_ahrs_id);
-	MessageBodyAccel body;
-	MessageAngularRate ang_rate(50);
-	MessageHeadingPitchRoll hprmsg(50);
-	mcan.add_message(body.getMsg());
-	mcan.add_message(ang_rate.getMsg());
-	mcan.add_message(hprmsg.getMsg());
-
 //	ahrs.accel.setLPF(0.05);
 //	ahrs.gyro.setLPF(0.005);
 
@@ -99,24 +76,10 @@ int main() {
 	{
 		if (updateDataFlag)
 		{
-			DataPoint accelp = ahrs.accel.getSensorData();
-			DataPoint gyrop = ahrs.gyro.getSensorData();
-			DataPoint magp = ahrs.compass.getSensorData();
+			ahrs.updateData();
 
 //			DataPoint filt_accelp = adx.getLPFData();
 //			DataPoint filt_gyrop = l3g.getLPFData();
-
-			// update MadgwickAHRS
-			MadgwickAHRSupdate(gyrop.getXf()* (PI/180), gyrop.getYf()* (PI/180), gyrop.getZf()* (PI/180),
-					accelp.getXf(), accelp.getYf(), accelp.getZf(),
-					magp.getXf(), magp.getYf(), magp.getZf());
-
-			// update body acceleration can message
-			body.updateFrame(accelp);
-			mcan.update_message(body.getMsg());
-			ang_rate.updateFrame(gyrop);
-			mcan.update_message(ang_rate.getMsg());
-
 
 //			double pitch = adx.getPitch();
 //			double roll = adx.getRoll();
@@ -133,21 +96,14 @@ int main() {
 //			double YH = (magp.getYf() * cos(roll)) + (magp.getZf() * sin(roll));
 //			double yaw = atan(-YH/XH) * (180/PI);	// why not atan2?
 
-			float madHeading = atan2(2*q2*q3 - 2*q1*q4, 2*q1*q1 + 2*q2*q2 - 1);
-			float madRoll = -asin(2*q2*q4 + 2*q1*q3);
-			float madPitch = atan2(2*q3*q4 - 2*q1*q2, 2*q1*q1 + 2*q4*q4 - 1);	// unsure why calculation is off by 180 degrees
-
 //			cout << "Pitch: " << madPitch << "\t";
 //			cout << "Roll: " << madRoll << "\t";
 //			cout << "Heading: " << madHeading << endl;
 
-			hprmsg.updateFrame(madHeading*(180/PI), madPitch*(180/PI), madRoll*(180/PI));
-			mcan.update_message(hprmsg.getMsg());
-
 #ifdef LOG_FILE
-			mFile << accelp.toFile(false, ',') << ",";
-			mFile << gyrop.toFile(false, ',') << ",";
-			mFile << magp.toFile(false, ',');
+//			mFile << accelp.toFile(false, ',') << ",";
+//			mFile << gyrop.toFile(false, ',') << ",";
+//			mFile << magp.toFile(false, ',');
 //			mFile << pitch * (180/PI) << ",";
 //			mFile << roll * (180/PI) << ",";
 //			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";

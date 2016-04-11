@@ -5,10 +5,9 @@
  *      Author: kbdavid15
  */
 
-#ifndef MESSAGEBODYACCEL_H_
-#define MESSAGEBODYACCEL_H_
+#ifndef MSG_MESSAGEBODYACCEL_H_
+#define MSG_MESSAGEBODYACCEL_H_
 
-#include "sensor/DataPoint.h"
 #include "can-utils/TxMsg.h"
 
 class MessageBodyAccel: public TxMsg {
@@ -22,7 +21,7 @@ public:
 	MessageBodyAccel(long period_ms);
 	virtual ~MessageBodyAccel();
 
-	void updateFrame(DataPoint p);
+	void updateFrame(float x, float y, float z);
 };
 
-#endif /* MESSAGEBODYACCEL_H_ */
+#endif /* MSG_MESSAGEBODYACCEL_H_ */

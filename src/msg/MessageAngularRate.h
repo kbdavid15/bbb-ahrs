@@ -5,10 +5,9 @@
  *      Author: kbdavid15
  */
 
-#ifndef MESSAGEANGULARRATE_H_
-#define MESSAGEANGULARRATE_H_
+#ifndef MSG_MESSAGEANGULARRATE_H_
+#define MSG_MESSAGEANGULARRATE_H_
 
-#include "sensor/DataPoint.h"
 #include "can-utils/TxMsg.h"
 
 class MessageAngularRate: virtual public TxMsg {
@@ -22,7 +21,7 @@ public:
 	MessageAngularRate(long period);
 	virtual ~MessageAngularRate();
 
-	void updateFrame(DataPoint p);
+	void updateFrame(float x, float y, float z);
 };
 
-#endif /* MESSAGEANGULARRATE_H_ */
+#endif /* MSG_MESSAGEANGULARRATE_H_ */

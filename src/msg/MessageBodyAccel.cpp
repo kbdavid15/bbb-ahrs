@@ -21,10 +21,10 @@ MessageBodyAccel::~MessageBodyAccel() {
 	// TODO Auto-generated destructor stub
 }
 
-void MessageBodyAccel::updateFrame(DataPoint p) {
-	x_acceleration = p.getXf() / 0.01;
-	y_acceleration = p.getYf() / 0.01;
-	z_acceleration = p.getZf() / 0.01;
+void MessageBodyAccel::updateFrame(float x, float y, float z) {
+	x_acceleration = x / 0.01;
+	y_acceleration = y / 0.01;
+	z_acceleration = z / 0.01;
 	updateFrameData();
 }
 

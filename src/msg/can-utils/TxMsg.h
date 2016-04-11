@@ -15,7 +15,7 @@ const int ARBID_ANGULAR_RATE	   = 0x608;
 
 #include <linux/can.h>
 #include <stdint.h>
-#include "linux/can/bcm.h"
+#include "../../msg/can-utils/linux/can/bcm.h"
 
 struct bcm_message {
 	struct bcm_msg_head msg_head;

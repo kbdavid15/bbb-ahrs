@@ -11,7 +11,7 @@
 #include "sensor/ADXL345.h"
 #include "sensor/L3G4200D.h"
 #include "sensor/HMC5883L.h"
-#include "can-utils/hscan.h"
+#include "MsgManager.h"
 
 using namespace sensor;
 
@@ -20,13 +20,19 @@ private:
 	void initAccel();
 	void initGyro();
 	void initCompass();
+	void initCAN();
 public:
 	ADXL345 accel;
 	L3G4200D gyro;
 	HMC5883L compass;
-	hscan can;
+	ahrs::MsgManager msgManager;
+
+	DataPoint accelData;
+	DataPoint gyroData;
+	DataPoint compassData;
 
 	void init();
+	void updateData();
 
 	AHRS();
 	virtual ~AHRS();

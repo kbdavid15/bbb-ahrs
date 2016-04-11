@@ -5,7 +5,7 @@
  *      Author: kbdavid15
  */
 
-#include "TxMsg.h"
+#include "../../msg/can-utils/TxMsg.h"
 
 TxMsg::TxMsg(uint32_t period, canid_t arbid, uint8_t dlc) {
 	msg.msg_head.opcode = TX_SETUP;

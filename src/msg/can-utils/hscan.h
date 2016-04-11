@@ -5,14 +5,19 @@
  *      Author: kbdavid15
  */
 
-#ifndef CAN_UTILS_HSCAN_H_
-#define CAN_UTILS_HSCAN_H_
+#ifndef MSG_CAN_UTILS_HSCAN_H_
+#define MSG_CAN_UTILS_HSCAN_H_
 
 #include <linux/can.h>
-#include "linux/can/bcm.h"
 #include <net/if.h>
 
-#include "TxMsg.h"
+#include "../../msg/can-utils/linux/can/bcm.h"
+#include "../../msg/can-utils/TxMsg.h"
+//
+//struct bcm_message {
+//	struct bcm_msg_head msg_head;
+//	struct can_frame frame;
+//};
 
 class hscan {
 private:
@@ -30,4 +35,4 @@ public:
 	void update_message(bcm_message);
 };
 
-#endif /* CAN_UTILS_HSCAN_H_ */
+#endif /* MSG_CAN_UTILS_HSCAN_H_ */
