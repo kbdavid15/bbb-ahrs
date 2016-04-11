@@ -11,6 +11,7 @@
 #include "ADXL345.h"
 #include "L3G4200D.h"
 #include "HMC5883L.h"
+#include "can-utils/hscan.h"
 
 class AHRS {
 private:
@@ -21,6 +22,7 @@ public:
 	ADXL345 accel;
 	L3G4200D gyro;
 	HMC5883L compass;
+	hscan can;
 
 	void init();
 

@@ -14,6 +14,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+
 #include "AHRS.h"
 #include "ADXL345.h"
 #include "can-utils/hscan.h"
@@ -31,8 +32,6 @@ extern "C" {
 }
 
 #define LOG_FILE = 1;
-
-using namespace std;
 
 bool updateDataFlag = true;
 const long SAMPLE_RATE_uS = 10000;	// 10ms for 100Hz
@@ -57,16 +56,30 @@ void setup_interrupt() {
 	setitimer ( ITIMER_REAL, &timer, NULL );
 }
 
+std::string getCurrentDateTime() {
+	time_t rawtime;
+	struct tm * timeinfo;
+	char buffer[80];
+
+	time (&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	strftime(buffer,80,"%Y-%m-%d_%H-%M-%S",timeinfo);
+	return std::string(buffer);
+}
+
 int main() {
 	setup_interrupt();
-
 	AHRS ahrs;
 	ahrs.init();
 
 #ifdef LOG_FILE
 	ofstream mFile;
-	mFile.open("acceldata.csv", ios::out);
-	mFile << "AccelX,AccelY,AccelZ,Pitch,Roll,IntAccelX,GyroX,GyroY,GyroZ,IntGyroZ,MagX,MagY,MagZ,Heading,Yaw,MadPitch,MadRoll,MadHeading" << endl;
+	std::string filename = "data_" + getCurrentDateTime() + ".csv";
+
+	mFile.open(filename.c_str(), ios::out);
+	mFile << "AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ" << endl;
+//	mFile << "AccelX,AccelY,AccelZ,Pitch,Roll,IntAccelX,GyroX,GyroY,GyroZ,IntGyroZ,MagX,MagY,MagZ,Heading,Yaw,MadPitch,MadRoll,MadHeading" << endl;
 #endif
 
 	long counter = 0;
@@ -82,8 +95,8 @@ int main() {
 	mcan.add_message(ang_rate.getMsg());
 	mcan.add_message(hprmsg.getMsg());
 
-	ahrs.accel.setLPF(0.05);
-	ahrs.gyro.setLPF(0.005);
+//	ahrs.accel.setLPF(0.05);
+//	ahrs.gyro.setLPF(0.005);
 
 	// main program loop
 	while (true)
@@ -136,12 +149,12 @@ int main() {
 			mcan.update_message(hprmsg.getMsg());
 
 #ifdef LOG_FILE
+			mFile << accelp.toFile(false, ',') << ",";
+			mFile << gyrop.toFile(false, ',') << ",";
+			mFile << magp.toFile(false, ',');
 //			mFile << pitch * (180/PI) << ",";
 //			mFile << roll * (180/PI) << ",";
 //			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";
-			mFile << accelp.toFile(false, ',') << ",";
-			mFile << gyrop.toFile(false, ',') << ",";
-//			mFile << magp.toFile(false, ',') << ",";
 //			mFile << heading << ",";
 //			mFile << yaw << ",";
 //			mFile << madPitch << ",";
@@ -152,7 +165,7 @@ int main() {
 			counter++;
 			updateDataFlag = false;
 		}
-//		if (counter > 500) break;
+		if (counter > 500) break;
 	}
 
 #ifdef LOG_FILE
