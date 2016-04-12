@@ -6,7 +6,15 @@
  */
 
 #include "AHRS.h"
-#include <iostream>
+
+#include <cmath>
+#include <ctime>
+#include <fstream>
+#include <string>
+
+#include "msg/can-utils/hscan.h"
+#include "msg/can-utils/TxMsg.h"
+#include "sensor/Sensor.h"
 
 extern "C" {
 	#include "MadgwickAHRS/MadgwickAHRS.h"
@@ -49,14 +57,14 @@ void AHRS::updateData() {
 void AHRS::initAccel() {
 	//	accel.startSelfTest();
 	accel.resetOffset();
-	//accel.calibrateOffset();	issue with z axis calibration (COMPOUNDING CALIBRATIONS, NEED TO RESET BEFORE CALCULATING)
+	accel.calibrateOffset();	// issue with z axis calibration (COMPOUNDING CALIBRATIONS, NEED TO RESET BEFORE CALCULATING)
 
 	DataFormat format;
 	format.fullRes = 1;
 	format.range = DataRange2g;
 	format.justify = 0;
 	accel.setDataFormat(format);	// value of 0x0B sets full resolution mode and range to +/- 16g
-	accel.setPowerCtrl(0x08);		// value of 0x08 enables measurement mode
+	accel.setPowerCtrl(0x08);		// enable measurement mode
 	accel.setInterruptEnable(0x00);	// disables interrupts
 	PwrDataRate odr(false, ODR_100); // set data rate to 100Hz
 	accel.setDataRate(odr);
@@ -82,4 +90,19 @@ void AHRS::init() {
 	initGyro();
 	initAccel();
 	initCAN();
+}
+
+void AHRS::printToFile(std::ofstream& oFile) {
+	if (oFile.is_open()) {
+		oFile << accelData.toFile(false, ',') << ",";
+		oFile << gyroData.toFile(false, ',') << ",";
+		oFile << compassData.toFile(false, ',');
+	}
+}
+
+void AHRS::printLineToFile(std::ofstream& oFile) {
+	if (oFile.is_open()) {
+		printToFile(oFile);
+		oFile << std::endl;
+	}
 }

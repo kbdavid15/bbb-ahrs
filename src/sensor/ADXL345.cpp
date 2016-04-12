@@ -107,18 +107,18 @@ bool ADXL345::startSelfTest() {
 	}
 }
 void ADXL345::calibrateOffset() {
-	DataFormat format(true, DataRange2g);
+	DataFormat format(true, DataRange16g);
 	setDataFormat(format);
 	setPowerCtrl(MeasureOn);
 	setInterruptEnable(0x80);
-	setDataRate((PwrDataRate) { false, ODR_800 });
+	setDataRate((PwrDataRate) { false, ODR_100 });
 	waitTime(true);	// wait for ODR settling
 
 	AvgData avgd = averageDataPoints(100);
 
 	int8_t sxCal = -(avgd.x / 4);
 	int8_t syCal = -(avgd.y / 4);
-	int8_t szCal = -((avgd.z - 256) / 4);
+	int8_t szCal = -((-avgd.z - 256) / 4);	// app note assumes that sensor is in Z=+1g orientation (it's in -1g)
 
 	uint8_t calib[3];
 	calib[0] = static_cast<unsigned char>(sxCal);

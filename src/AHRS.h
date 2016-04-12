@@ -8,10 +8,13 @@
 #ifndef AHRS_H_
 #define AHRS_H_
 
-#include "sensor/ADXL345.h"
-#include "sensor/L3G4200D.h"
-#include "sensor/HMC5883L.h"
+#include <iostream>
+
 #include "MsgManager.h"
+#include "sensor/ADXL345.h"
+#include "sensor/DataPoint.h"
+#include "sensor/HMC5883L.h"
+#include "sensor/L3G4200D.h"
 
 using namespace sensor;
 
@@ -26,13 +29,14 @@ public:
 	L3G4200D gyro;
 	HMC5883L compass;
 	ahrs::MsgManager msgManager;
-
 	DataPoint accelData;
 	DataPoint gyroData;
 	DataPoint compassData;
 
 	void init();
 	void updateData();
+	void printToFile(std::ofstream& file);
+	void printLineToFile(std::ofstream& file);
 
 	AHRS();
 	virtual ~AHRS();

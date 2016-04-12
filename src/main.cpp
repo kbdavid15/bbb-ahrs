@@ -15,7 +15,7 @@
 
 #include "AHRS.h"
 
-//#define LOG_FILE = 1;
+#define LOG_FILE = 1;
 
 bool updateDataFlag = true;
 const long SAMPLE_RATE_uS = 10000;	// 10ms for 100Hz
@@ -59,7 +59,7 @@ int main() {
 
 #ifdef LOG_FILE
 	ofstream mFile;
-	std::string filename = "data_" + getCurrentDateTime() + ".csv";
+	std::string filename = "data/data_" + getCurrentDateTime() + ".csv";
 
 	mFile.open(filename.c_str(), ios::out);
 	mFile << "AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ" << endl;
@@ -77,6 +77,9 @@ int main() {
 		if (updateDataFlag)
 		{
 			ahrs.updateData();
+#ifdef LOG_FILE
+			ahrs.printLineToFile(mFile);
+#endif
 
 //			DataPoint filt_accelp = adx.getLPFData();
 //			DataPoint filt_gyrop = l3g.getLPFData();
@@ -96,14 +99,7 @@ int main() {
 //			double YH = (magp.getYf() * cos(roll)) + (magp.getZf() * sin(roll));
 //			double yaw = atan(-YH/XH) * (180/PI);	// why not atan2?
 
-//			cout << "Pitch: " << madPitch << "\t";
-//			cout << "Roll: " << madRoll << "\t";
-//			cout << "Heading: " << madHeading << endl;
-
 #ifdef LOG_FILE
-//			mFile << accelp.toFile(false, ',') << ",";
-//			mFile << gyrop.toFile(false, ',') << ",";
-//			mFile << magp.toFile(false, ',');
 //			mFile << pitch * (180/PI) << ",";
 //			mFile << roll * (180/PI) << ",";
 //			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";
@@ -112,7 +108,7 @@ int main() {
 //			mFile << madPitch << ",";
 //			mFile << madRoll << ",";
 //			mFile << madHeading << ",";
-			mFile << endl;
+//			mFile << endl;
 #endif
 			counter++;
 			updateDataFlag = false;
