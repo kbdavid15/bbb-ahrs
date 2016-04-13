@@ -8,12 +8,6 @@
 #ifndef LIB_MYI2C_H_
 #define LIB_MYI2C_H_
 
-#include <linux/i2c-dev.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <cstdlib>
-#include <cstdio>
 
 #define MAX_BUF_SIZE 64
 

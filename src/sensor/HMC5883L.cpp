@@ -29,7 +29,6 @@ HMC5883L::HMC5883L(GainIdx gain):device(HMC_DEVICE_ADDRESS) {
 	setConfigRegB(gain);
 }
 HMC5883L::~HMC5883L() {
-	cout << "HMC obj deleted" << endl;
 }
 
 string HMC5883L::getDeviceID() {
@@ -82,49 +81,59 @@ Status HMC5883L::getStatus() {
 	status.DataLocked = statusReg & 0x02;
 	return status;
 }
-//bool HMC5883L::runSelfTest() {
-//	// positive self-test process using continuous measurement mode
-//	setConfigRegA(AVG_SAMPLES_8 | DATA_RATE_75 | MEAS_MODE_POS);
-//	setConfigRegB(GAIN_5);
-//	setModeRegister(SingleMeasurement);
-//	// wait until data ready
-//	uint8_t counter = 0;
-//	while (!getStatus().DataReady) {
-//		counter++;
-//		if (counter > 255) {
-//			cout << "Error, data never ready. Self test aborted" << endl;
-//			return false;
-//		}
-//	}
-//	// read data ( if recently changed the gain do extra read to reset)
-//	if (_gain.updateFlag)
-//	{
-//		getDataXYZ();
-//		_gain.updateFlag = false;
-//	}
-//	while (true) {
-//		Data d = getDataReadyXYZ();
-//		int upperLimit = 575 * LSB_PER_GAUSS[_gain.gIdx] / 390;
-//		int lowerLimit = 243 * LSB_PER_GAUSS[_gain.gIdx] / 390;
-//		if (	((d.x <= upperLimit) && (d.x >= lowerLimit)) |
-//				((d.y <= upperLimit) && (d.y >= lowerLimit)) |
-//				((d.z <= upperLimit) && (d.z >= lowerLimit)) )	{
-//			// test passed
-//			setConfigRegA( CRA_DEFAULT | MEAS_MODE_NORM );
-//			cout << "Passed @ Gain: " << _gain.gIdx << "\t" << d.toString() << endl;
-//			return true;
-//		} else {
-//			if (_gain.gIdx < GAIN_7) {
-//				cout << "Failed @ Gain: " << _gain.gIdx << "\t" << d.toString() << endl;
-//				setConfigRegB(_gain.incrementIdx());
-//			}
-//			else {
-//				setConfigRegA( CRA_DEFAULT | MEAS_MODE_NORM );
-//				return false;
-//			}
-//		}
-//	}
-//}
+bool HMC5883L::runSelfTest() {
+	// positive self-test process using continuous measurement mode
+	setConfigRegA(ConfigRegA(AvgSamples8, DataRate_15, PositiveBiasMode));
+	setConfigRegB(GAIN_3);
+	setModeRegister(ContinuousMeasurement);
+	// wait until data ready
+	uint8_t counter = 0;
+	while (!getStatus().DataReady) {
+		counter++;
+		if (counter > 255) {
+			cout << "Error, data never ready. Self test aborted" << endl;
+			return false;
+		}
+	}
+	// read data ( if recently changed the gain do extra read to reset)
+	if (_gain.isUpdateFlag())
+	{
+		getSensorData();
+		_gain.setUpdateFlag(false);
+	}
+	while (true) {
+		counter = 0;
+		while (!getStatus().DataReady) {
+			counter++;
+			if (counter > 255) {
+				cout << "Error, data never ready. Self test aborted" << endl;
+				break;
+			}
+		}
+		DataPoint d = getSensorData();
+		int upperLimit = 575 * LSB_PER_GAUSS[_gain.getGainIdx()] / 390;
+		int lowerLimit = 243 * LSB_PER_GAUSS[_gain.getGainIdx()] / 390;
+		if (	((d.getX() <= upperLimit) && (d.getX() >= lowerLimit)) |
+				((d.getY() <= upperLimit) && (d.getY() >= lowerLimit)) |
+				((d.getZ() <= upperLimit) && (d.getZ() >= lowerLimit)) )	{
+			// test passed
+			setConfigRegA(ConfigRegA( AvgSamples1, DataRate_75, NormalMode));
+			cout << "Passed @ Gain: " << _gain.getGainIdx() << "\t" << d.toString() << std::endl;
+			return true;
+		} else {
+			if (_gain.getGainIdx() < GAIN_7) {
+				cout << "Failed @ Gain: " << _gain.getGainIdx() << "\t" << d.toString() << std::endl;
+				setConfigRegB(_gain.incrementIdx());
+				_gain.setUpdateFlag(true);
+				getSensorData();
+			}
+			else {
+				setConfigRegA(ConfigRegA( AvgSamples1, DataRate_75, NormalMode));
+				return false;
+			}
+		}
+	}
+}
 void HMC5883L::dumpAllRegisters(unsigned char* regData, unsigned char len) {
 	device.readBytes(HMC_CONFIG_REG_A, regData, len);
 	for (uint8_t i = 0; i < len; i++) {

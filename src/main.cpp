@@ -119,6 +119,6 @@ int main() {
 #ifdef LOG_FILE
 	mFile.close();
 #endif
-
+	cout << "Exiting..." << endl;
 	return 0;
 }

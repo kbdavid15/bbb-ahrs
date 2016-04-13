@@ -6,11 +6,14 @@
  */
 
 #include "MsgManager.h"
-
+#include <iostream>
 namespace ahrs {
 
 MsgManager::MsgManager() {
-
+	if (!can.isUp()) {
+		std::cout << "Interface is down" << std::endl;
+		can.set_if_up("can0", 0);
+	}
 }
 
 MsgManager::~MsgManager() {

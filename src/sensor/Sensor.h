@@ -8,9 +8,6 @@
 #ifndef SENSOR_H_
 #define SENSOR_H_
 
-#include <string>
-#include <sstream>
-//#include <queue>
 #include <deque>
 
 #include "DataPoint.h"

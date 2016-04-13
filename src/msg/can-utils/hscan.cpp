@@ -13,6 +13,8 @@
 #include <unistd.h>
 #include <cstdio>
 #include <cstring>
+#include <net/if.h>
+#include <errno.h>
 
 hscan::hscan() : hscan("can0") {}
 
@@ -29,6 +31,39 @@ hscan::hscan(const char * interface) {
 
 hscan::~hscan() {
 
+}
+
+bool hscan::isUp() {
+	return !!(ifr.ifr_flags & IFF_UP);
+}
+
+//void hscan::bringUp() {
+//	ifr.ifr_flags |= IFF_UP;
+//	ioctl(bcm_socket, SIOCSIFFLAGS, &ifr);
+//}
+
+int hscan::set_if_flags(char *ifname, short flags)
+{
+	 struct ifreq ifr;
+	 int res = 0;
+
+	 ifr.ifr_flags = flags;
+	 strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+
+	 res = ioctl(bcm_socket, SIOCSIFFLAGS, &ifr);
+	 if (res < 0) {
+			 printf("Interface '%s': Error: SIOCSIFFLAGS failed: %s\n",
+					 ifname, strerror(errno));
+	 } else {
+			 printf("Interface '%s': flags set to %04X.\n", ifname, flags);
+	 }
+
+	 return res;
+}
+
+int hscan::set_if_up(char *ifname, short flags)
+{
+	 return set_if_flags(ifname, flags | IFF_UP);
 }
 
 void hscan::add_message(bcm_message msg) {

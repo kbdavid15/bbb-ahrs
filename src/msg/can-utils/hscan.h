@@ -11,13 +11,8 @@
 #include <linux/can.h>
 #include <net/if.h>
 
-#include "../../msg/can-utils/linux/can/bcm.h"
-#include "../../msg/can-utils/TxMsg.h"
-//
-//struct bcm_message {
-//	struct bcm_msg_head msg_head;
-//	struct can_frame frame;
-//};
+#include "linux/can/bcm.h"
+#include "TxMsg.h"
 
 class hscan {
 private:
@@ -33,6 +28,9 @@ public:
 	bcm_message add_message(canid_t addr, long period, unsigned char len, unsigned char * data);
 	bcm_message add_message(can_frame frame, long period);
 	void update_message(bcm_message);
+	bool isUp();
+	int set_if_flags(char *ifname, short flags);
+	int set_if_up(char *ifname, short flags);
 };
 
 #endif /* MSG_CAN_UTILS_HSCAN_H_ */
