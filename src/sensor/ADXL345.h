@@ -205,6 +205,7 @@ private:
 	// output data rate in Hz
 	double dataRate;
 	const static double DATA_RATE_VAL[];
+	double formatMult;
 
 public:
 	ADXL345();

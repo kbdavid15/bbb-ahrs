@@ -24,6 +24,7 @@ const double ADXL345::DATA_RATE_VAL[] = { 6.25, 12.5, 25, 50, 100, 200, 400, 800
 
 ADXL345::ADXL345():spi(BlackLib::SPI0_0, 8, BlackLib::SpiMode3, 2400000) {
 	dataRate = 100;	// default value
+	formatMult = 1;
 }
 ADXL345::~ADXL345() {
 	spi.close();
@@ -40,23 +41,24 @@ void ADXL345::setDataFormat(DataFormat format) {
 	spi.writeByte(DATA_FORMAT, format.getData());
 	// set the scale format multiplier
 	if (format.fullRes) {
-		dataPoint.setFormatMultiplier(3.9/1000);
+		formatMult = 3.9/1000;
 	} else {
 		switch (format.range) {
 		case DataRange2g:
-			dataPoint.setFormatMultiplier(4.0/1024);
+			formatMult = 4.0/1024;
 			break;
 		case DataRange4g:
-			dataPoint.setFormatMultiplier(8.0/1024);
+			formatMult = 8.0/1024;
 			break;
 		case DataRange8g:
-			dataPoint.setFormatMultiplier(16.0/1024);
+			formatMult = 16.0/1024;
 			break;
 		case DataRange16g:
-			dataPoint.setFormatMultiplier(32.0/1024);
+			formatMult = 32.0/1024;
 			break;
 		}
 	}
+	dataPoint.setFormatMultiplier(formatMult);
 }
 DataFormat ADXL345::getDataFormat() {
 	uint8_t regData = spi.readByte(DATA_FORMAT);
@@ -182,10 +184,11 @@ DataPoint ADXL345::getSensorData() {
 	setLastDataPoint(dataPoint);
 	uint8_t recvBytes[7];
 	spi.readBytes(DATAX0, recvBytes, sizeof(recvBytes));
-	dataPoint.setX((int)(recvBytes[2] << 8) | (int)recvBytes[1]);
-	dataPoint.setY((int)(recvBytes[4] << 8) | (int)recvBytes[3]);
-	dataPoint.setZ(-((int)(recvBytes[6] << 8) | (int)recvBytes[5]));
-	return dataPoint;
+	int16_t x, y, z;
+	x = (int)(recvBytes[2] << 8) | (int)recvBytes[1];
+	y = (int)(recvBytes[4] << 8) | (int)recvBytes[3];
+	z = -((int)(recvBytes[6] << 8) | (int)recvBytes[5]);
+	return dataPoint = DataPoint(x, y, z, formatMult);
 }
 // radians
 double ADXL345::getPitch() {

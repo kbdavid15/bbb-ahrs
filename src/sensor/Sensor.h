@@ -18,8 +18,6 @@ private:
 	static const uint8_t QUEUE_SIZE;
 	std::deque<double> _xQ, _yQ, _zQ;
 	double _xfLast, _yfLast, _zfLast;
-	double _xTrapLast, _yTrapLast, _zTrapLast;
-	double xTrap, yTrap, zTrap;
 	DataPoint lastDataPoint;
 
 	uint64_t lastSampleTime = 0;

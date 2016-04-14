@@ -80,7 +80,7 @@ int main() {
 #ifdef LOG_FILE
 			ahrs.printToFile(mFile);
 			ahrs.gyro.trapezoidal();
-//			auto itsatrap = ahrs.gyro.trapezoidal();
+//			ahrs.accel.trapezoidal();
 			mFile << ahrs.gyro.trap.toFile(',') << endl;
 #endif
 
@@ -116,7 +116,7 @@ int main() {
 			counter++;
 			updateDataFlag = false;
 		}
-		if (counter > 500) break;
+		if (counter > 1000) break;
 	}
 
 #ifdef LOG_FILE

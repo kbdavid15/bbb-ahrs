@@ -16,29 +16,10 @@ Sensor::~Sensor() {
 }
 
 Sensor::Sensor() {
-	_xTrapLast = 0;
-	_yTrapLast = 0;
-	_zTrapLast = 0;
 	_xfLast = 0;
 	_yfLast = 0;
 	_zfLast = 0;
-	xTrap = 0;
-	yTrap = 0;
-	zTrap = 0;
 	trap = DoublePoint(0,0,0);
-}
-
-double Sensor::trapX(long uTs) {
-	double Ts = uTs / 1000000.0;
-//	_xTrapLast = (_xTrapLast) + (1/(2*(double)fs)) * (_xLast + _x);
-	_xTrapLast = (_xTrapLast) + (Ts/2.0) * (_xfLast + dataPoint.getXf());
-	return _xTrapLast;
-}
-
-double Sensor::trapZ(long uTs) {
-	double Ts = uTs / 1000000.0;
-	_zTrapLast = (_zTrapLast) + Ts * (lastDataPoint.getZf() + dataPoint.getZf());
-	return _zTrapLast;
 }
 
 void Sensor::trapezoidal() {
