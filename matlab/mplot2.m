@@ -16,11 +16,18 @@ subplot(3,1,2)
 plot(t, D.GyroX, t, D.GyroY, t, D.GyroZ) 
 grid
 title('Gyroscope Output');
-ylabel('Degrees Per Second');
+ylabel('deg/sec');
 
 subplot(3,1,3)
 plot(t, D.MagX, t, D.MagY, t, D.MagZ)
 grid
 title('Magnetometer Output');
 ylabel('Gauss');
+xlabel('Time (seconds)');
+
+figure
+plot(t, D.IntGyroX, t, D.IntGyroY, t, D.IntGyroZ)
+grid
+title('Gyroscope Integrated');
+ylabel('degrees');
 xlabel('Time (seconds)');
