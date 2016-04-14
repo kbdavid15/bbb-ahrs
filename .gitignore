@@ -61,4 +61,4 @@ Release/
 
 #matlab temp files
 *.asv
-*.csv
+matlab/*.csv
