@@ -11,14 +11,18 @@
 #include <stdint.h>
 #include <string>
 
-
 class DataPoint {
 private:
 	long x = 0, y = 0, z = 0;
 
-	double dataFormatMult;
 //	double lpf = 1;	// default value of 1 means no filter
 public:
+	DataPoint();
+	DataPoint(int16_t x, int16_t y, int16_t z, double format);
+	~DataPoint();
+	static uint64_t getMicros();
+	uint64_t sensorReadTime;
+	double dataFormatMult;
 	float  xf = 0, yf = 0, zf = 0;
 	DataPoint operator -(const DataPoint& p);
 	DataPoint operator +(const DataPoint& p);
@@ -32,8 +36,6 @@ public:
 	std::string toString();
 	std::string toString(bool rawData);
 	std::string toFile(bool rawData, char formatSpecifier);
-
-
 
 	int16_t getX() const {
 		return x;
@@ -65,8 +67,6 @@ public:
 	float getZf() {
 		return zf;
 	}
-
-
 
 	void setFormatMultiplier(double dataFormatMult) {
 		this->dataFormatMult = dataFormatMult;

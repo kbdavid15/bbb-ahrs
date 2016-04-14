@@ -11,10 +11,12 @@
 #include <ctime>
 #include <fstream>
 #include <string>
+#include <sys/time.h>
 
 #include "msg/can-utils/hscan.h"
 #include "msg/can-utils/TxMsg.h"
 #include "sensor/Sensor.h"
+#include "sensor/DoublePoint.h"
 
 extern "C" {
 	#include "MadgwickAHRS/MadgwickAHRS.h"
@@ -23,11 +25,8 @@ extern "C" {
 const char * bbb_ahrs_id = "BBB-AHRS";
 
 AHRS::AHRS() {
-
 }
-
 AHRS::~AHRS() {
-
 }
 
 void AHRS::initCAN() {
@@ -96,7 +95,7 @@ void AHRS::printToFile(std::ofstream& oFile) {
 	if (oFile.is_open()) {
 		oFile << accelData.toFile(false, ',') << ",";
 		oFile << gyroData.toFile(false, ',') << ",";
-		oFile << compassData.toFile(false, ',');
+		oFile << compassData.toFile(false, ',') << ",";
 	}
 }
 

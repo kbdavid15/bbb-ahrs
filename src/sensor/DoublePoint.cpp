@@ -28,4 +28,5 @@ std::string DoublePoint::toFile(char formatSpecifier) {
 	ss << x << formatSpecifier;
 	ss << y << formatSpecifier;
 	ss << z;
+	return ss.str();
 }

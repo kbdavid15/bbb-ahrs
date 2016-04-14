@@ -6,9 +6,32 @@
  */
 
 #include "DataPoint.h"
-
+#include <sys/time.h>
 #include <sstream>
+
 using namespace std;
+
+uint64_t DataPoint::getMicros() {
+	struct timeval tv;
+	gettimeofday(&tv,NULL);
+	auto time = tv.tv_sec*(uint64_t)1000000+tv.tv_usec;
+	return time;
+}
+
+DataPoint::DataPoint(int16_t x, int16_t y, int16_t z, double format) {
+	dataFormatMult = format;
+	setX(x);
+	setY(y);
+	setZ(z);
+	sensorReadTime = getMicros();
+}
+
+DataPoint::DataPoint() {
+//	sensorReadTime = 0;
+//	dataFormatMult = 0;
+}
+
+DataPoint::~DataPoint() { }
 
 DataPoint DataPoint::operator -(const DataPoint& p)  {
 	DataPoint newData = copyFormatFrom(p);

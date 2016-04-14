@@ -32,16 +32,17 @@ namespace sensor {
 		setLastDataPoint(dataPoint);	// save last data point before updating
 		uint8_t recvBytes[7];
 		spi.readBytes(OUT_X_L, recvBytes, sizeof(recvBytes));
+		int16_t x, y, z;
 		if (_ControlReg4.ble == BigEndian) {
-			dataPoint.setX(((recvBytes[2] << 8) | recvBytes[1]) - _xOffset);
-			dataPoint.setY(((recvBytes[4] << 8) | recvBytes[3]) - _yOffset);
-			dataPoint.setZ(((recvBytes[6] << 8) | recvBytes[5]) - _zOffset);
+			x = ((recvBytes[2] << 8) | recvBytes[1]) - _xOffset;
+			y = ((recvBytes[4] << 8) | recvBytes[3]) - _yOffset;
+			z = ((recvBytes[6] << 8) | recvBytes[5]) - _zOffset;
 		} else {
-			dataPoint.setX(((recvBytes[1] << 8) | recvBytes[2]) - _xOffset);
-			dataPoint.setY(((recvBytes[3] << 8) | recvBytes[4]) - _yOffset);
-			dataPoint.setZ(((recvBytes[5] << 8) | recvBytes[6]) - _zOffset);
+			x = ((recvBytes[1] << 8) | recvBytes[2]) - _xOffset;
+			y = ((recvBytes[3] << 8) | recvBytes[4]) - _yOffset;
+			z = ((recvBytes[5] << 8) | recvBytes[6]) - _zOffset;
 		}
-		return dataPoint;
+		return dataPoint = DataPoint(x, y, z, DPS_CONV_VAL[_ControlReg4.scale]);
 	}
 
 	void L3G4200D::setControlReg4(CR4 reg) {

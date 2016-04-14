@@ -62,7 +62,7 @@ int main() {
 	std::string filename = "data/data_" + getCurrentDateTime() + ".csv";
 
 	mFile.open(filename.c_str(), ios::out);
-	mFile << "AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ" << endl;
+	mFile << "AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ,IntGyroX,IntGyroY,IntGyroZ" << endl;
 //	mFile << "AccelX,AccelY,AccelZ,Pitch,Roll,IntAccelX,GyroX,GyroY,GyroZ,IntGyroZ,MagX,MagY,MagZ,Heading,Yaw,MadPitch,MadRoll,MadHeading" << endl;
 #endif
 
@@ -78,7 +78,10 @@ int main() {
 		{
 			ahrs.updateData();
 #ifdef LOG_FILE
-			ahrs.printLineToFile(mFile);
+			ahrs.printToFile(mFile);
+			ahrs.gyro.trapezoidal();
+//			auto itsatrap = ahrs.gyro.trapezoidal();
+			mFile << ahrs.gyro.trap.toFile(',') << endl;
 #endif
 
 //			DataPoint filt_accelp = adx.getLPFData();

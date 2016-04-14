@@ -24,6 +24,7 @@ private:
 	void initGyro();
 	void initCompass();
 	void initCAN();
+
 public:
 	ADXL345 accel;
 	L3G4200D gyro;
@@ -37,6 +38,7 @@ public:
 	void updateData();
 	void printToFile(std::ofstream& file);
 	void printLineToFile(std::ofstream& file);
+
 
 	AHRS();
 	virtual ~AHRS();

@@ -6,7 +6,7 @@
  */
 
 #include "Sensor.h"
-
+#include <iostream>
 using namespace std;
 
 const uint8_t Sensor::QUEUE_SIZE = 2;
@@ -22,6 +22,10 @@ Sensor::Sensor() {
 	_xfLast = 0;
 	_yfLast = 0;
 	_zfLast = 0;
+	xTrap = 0;
+	yTrap = 0;
+	zTrap = 0;
+	trap = DoublePoint(0,0,0);
 }
 
 double Sensor::trapX(long uTs) {
@@ -37,6 +41,14 @@ double Sensor::trapZ(long uTs) {
 	return _zTrapLast;
 }
 
+void Sensor::trapezoidal() {
+	double delta = (dataPoint.sensorReadTime - lastDataPoint.sensorReadTime) / (double)1000000.0;
+	trap.x += (delta * lastDataPoint.getXf() + 0.5 * delta * (dataPoint.getXf() - lastDataPoint.getXf()));
+	trap.y += (delta * lastDataPoint.getYf() + 0.5 * delta * (dataPoint.getYf() - lastDataPoint.getYf()));
+	trap.z += (delta * lastDataPoint.getZf() + 0.5 * delta * (dataPoint.getZf() - lastDataPoint.getZf()));
+	cout << trap.toFile(',') << endl;
+}
+
 DataPoint Sensor::getLPFData() {
 //	fXg = Xg * alpha + (fXg * (1.0 - alpha));
 	DataPoint p = DataPoint::copyFormatFrom(this->dataPoint);
@@ -46,9 +58,9 @@ DataPoint Sensor::getLPFData() {
 	return p;
 }
 
-DoublePoint* Sensor::SimpleLowPass(double alpha) {
+DoublePoint Sensor::SimpleLowPass(double alpha) {
 	double xf = dataPoint.xf + alpha * (lastDataPoint.xf - dataPoint.xf);
 	double yf = dataPoint.yf + alpha * (lastDataPoint.yf - dataPoint.yf);
 	double zf = dataPoint.zf + alpha * (lastDataPoint.zf - dataPoint.zf);
-	return new DoublePoint(xf,yf,zf);
+	return DoublePoint(xf,yf,zf);
 }
