@@ -9,8 +9,6 @@
 #include <iostream>
 using namespace std;
 
-const uint8_t Sensor::QUEUE_SIZE = 2;
-
 Sensor::~Sensor() {
 	// TODO Auto-generated destructor stub
 }

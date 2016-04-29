@@ -24,6 +24,7 @@ private:
 	void initGyro();
 	void initCompass();
 	void initCAN();
+	double _heading, _pitch, _roll;
 
 public:
 	ADXL345 accel;
@@ -38,6 +39,7 @@ public:
 	void updateData();
 	void printToFile(std::ofstream& file);
 	void printLineToFile(std::ofstream& file);
+	void printHPRToFile(std::ofstream& file);
 
 
 	AHRS();

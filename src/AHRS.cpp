@@ -25,6 +25,9 @@ extern "C" {
 const char * bbb_ahrs_id = "BBB-AHRS";
 
 AHRS::AHRS() {
+	_heading = 0;
+	_pitch = 0;
+	_roll = 0;
 }
 AHRS::~AHRS() {
 }
@@ -38,6 +41,11 @@ void AHRS::updateData() {
 	accelData = accel.getSensorData();
 	gyroData = gyro.getSensorData();
 	compassData = compass.getSensorData();
+
+	// get heading, pitch, and roll in degrees
+	_heading = compass.getHeadingDeg();
+	_pitch = accel.getPitch() * 180/PI;
+	_roll = accel.getRoll() * 180/PI;
 
 	// update MadgwickAHRS
 	MadgwickAHRSupdate(gyroData.getXf()* (PI/180), gyroData.getYf()* (PI/180), gyroData.getZf()* (PI/180),
@@ -103,5 +111,13 @@ void AHRS::printLineToFile(std::ofstream& oFile) {
 	if (oFile.is_open()) {
 		printToFile(oFile);
 		oFile << std::endl;
+	}
+}
+
+void AHRS::printHPRToFile(std::ofstream& oFile) {
+	if (oFile.is_open()) {
+		oFile << _heading << ",";
+		oFile << _pitch << ",";
+		oFile << _roll;
 	}
 }

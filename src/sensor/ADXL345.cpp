@@ -195,18 +195,13 @@ double ADXL345::getPitch() {
 	double x = dataPoint.getXf();
 	double y = dataPoint.getYf();
 	double z = dataPoint.getZf();
-//	double value = atan(x/sqrt(pow(y,2) + pow(z,2)))*(180/PI);
-//	return value;
-	return atan2(-x,sqrt(pow(y,2) + pow(z,2)));
+	return atan2(x,sqrt(y*y + z*z));
 }
 // radians
 double ADXL345::getRoll() {
 //	double x = dataPoint.getXf();
 	double y = dataPoint.getYf();
 	double z = dataPoint.getZf();
-//	return atan(-x/z)*(180/PI);
-//	double value = atan(y/sqrt(pow(x,2) + pow(z,2)))*(180/PI);
-//	return value;
-	return atan(y/z);
+	return atan2(y, y*y + z*z);
 }
 };	/* namespace sensor */

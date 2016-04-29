@@ -62,7 +62,7 @@ int main() {
 	std::string filename = "data/data_" + getCurrentDateTime() + ".csv";
 
 	mFile.open(filename.c_str(), ios::out);
-	mFile << "AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ,IntGyroX,IntGyroY,IntGyroZ" << endl;
+	mFile << "AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,MagX,MagY,MagZ,IntGyroX,IntGyroY,IntGyroZ,Heading,Pitch,Roll" << endl;
 //	mFile << "AccelX,AccelY,AccelZ,Pitch,Roll,IntAccelX,GyroX,GyroY,GyroZ,IntGyroZ,MagX,MagY,MagZ,Heading,Yaw,MadPitch,MadRoll,MadHeading" << endl;
 #endif
 
@@ -80,19 +80,13 @@ int main() {
 #ifdef LOG_FILE
 			ahrs.printToFile(mFile);
 			ahrs.gyro.trapezoidal();
-//			ahrs.accel.trapezoidal();
-			mFile << ahrs.gyro.trap.toFile(',') << endl;
+			mFile << ahrs.gyro.trap.toFile(',') << ",";
+			ahrs.printHPRToFile(mFile);
+			mFile << endl;
 #endif
 
 //			DataPoint filt_accelp = adx.getLPFData();
 //			DataPoint filt_gyrop = l3g.getLPFData();
-
-//			double pitch = adx.getPitch();
-//			double roll = adx.getRoll();
-//			cout << p.toString(false) << endl;
-//			cout << gyrop.toString(false) << endl;
-//			cout << p.toString(false) << endl;
-
 //			double heading = hmc.getHeadingDeg();
 
 			// calculate yaw rate
@@ -101,22 +95,10 @@ int main() {
 //						(magp.getZf() * sin(pitch) * cos(roll));
 //			double YH = (magp.getYf() * cos(roll)) + (magp.getZf() * sin(roll));
 //			double yaw = atan(-YH/XH) * (180/PI);	// why not atan2?
-
-#ifdef LOG_FILE
-//			mFile << pitch * (180/PI) << ",";
-//			mFile << roll * (180/PI) << ",";
-//			mFile << adx.trapX(SAMPLE_RATE_uS) << ",";
-//			mFile << heading << ",";
-//			mFile << yaw << ",";
-//			mFile << madPitch << ",";
-//			mFile << madRoll << ",";
-//			mFile << madHeading << ",";
-//			mFile << endl;
-#endif
 			counter++;
 			updateDataFlag = false;
 		}
-		if (counter > 1000) break;
+		if (counter >= 1000) break;
 	}
 
 #ifdef LOG_FILE
