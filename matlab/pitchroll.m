@@ -6,13 +6,20 @@ D = dataset('File', filename, 'Delimiter', ',');
 t = (1:size(D, 1)) * Ts;
 
 figure
-subplot(2,1,1)
+subplot(3,1,1)
+plot(t, D.AccelX, t, D.AccelY, t, D.AccelZ)
+grid
+legend('X', 'Y', 'Z')
+title('Acceleration Output');
+ylabel('Accel - g');
+
+subplot(3,1,2)
 plot(t, D.Pitch)
 grid
 title('Pitch from Accelerometer');
 ylabel('degrees');
 
-subplot(2,1,2)
+subplot(3,1,3)
 plot(t, D.Roll)
 grid
 title('Roll from Accelerometer');
