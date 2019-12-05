@@ -1,5 +1,5 @@
 
-#BBB-AHRS
+# BBB-AHRS
 A cape for [BeagleBone Black](http://beagleboard.org/BLACK), this contains libraries and code to create a 9 DOF Attitude and Heading Reference System. The board is designed to work with the following devices:
 
  - ADXL345, accelerometer from Analog Devices
@@ -14,7 +14,7 @@ L3G4200D| SPI1
 HMC5883L| I<sup>2</sup>C2
 TJA1051 | DCAN1
 
-##Getting Started
+## Getting Started
 The BeagleBone pins are configured at startup using a Device Tree Overlay. To configure the BeagleBone to use the BBB-AHRS cape, compile the device tree overlay file [BBB-AHRS-00A0.dts](https://github.com/kbdavid15/bbb-ahrs/blob/master/setup/BBB-AHRS-00A0.dts). There is a helper bash script in the setup folder to get started.
 
 To see exactly which pins are in use by the BeagleBone, look at the contents of the pingroups file:
@@ -24,11 +24,11 @@ To see exactly which pins are in use by the BeagleBone, look at the contents of 
     
 The .dtbo file BBB-AHRS-00A0.dtbo shoule be present in /lib/firmware/
     
-##Modify uEnv.txt
+## Modify uEnv.txt
 This cape uses SPI1, which is connected to the same pins as the HDMI framer. HDMI must be disabled for this cape to work properly. Add the following line to uEnv.txt
 	capemgr.disable\_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN capemgr.enable_partno=BBB-AHRS
 	
-##The Cape Manager
+## The Cape Manager
     cat /sys/devices/bone_capemgr.*/slots
      0: 54:PF--- 
      1: 55:PF--- 
